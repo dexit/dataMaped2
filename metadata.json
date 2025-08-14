@@ -1,0 +1,5 @@
+{
+  "name": "Data Mapper Pro",
+  "description": "An intelligent data mapping tool to create, manage, and test data transformations. It allows users to define mappings manually, import them from CSV files, organize them into categories, and use AI to suggest mapping configurations. The application also includes an API testing suite to validate mappings with live data.",
+  "requestFramePermissions": []
+}
