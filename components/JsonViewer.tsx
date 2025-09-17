@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import type { Mapping } from '../types';
 import { IconJson } from '../constants';
 
+const inputClasses = "block w-full text-sm rounded-md border-slate-300 bg-slate-50 shadow-sm focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-slate-200 disabled:cursor-not-allowed";
+
 interface JsonViewerProps {
   mappings: Mapping[];
   showToast: (message: string, type: 'success' | 'error') => void;
@@ -45,7 +47,7 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ mappings, showToast }) => {
           <select
             onChange={(e) => setSelectedMappingId(e.target.value)}
             value={selectedMappingId ?? ""}
-            className="block w-full max-w-xs rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"
+            className={`max-w-xs ${inputClasses}`}
           >
             <option value="">-- Select a Mapping --</option>
             {mappings.map((mapping) => (

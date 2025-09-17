@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import type { Category } from '../types';
 import { IconPlus, IconTrash, IconCategory } from '../constants';
 
+const inputClasses = "block w-full text-sm rounded-md border-slate-300 bg-slate-50 shadow-sm focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-slate-200 disabled:cursor-not-allowed";
+
 interface CategoryManagerProps {
   categories: Category[];
   setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
@@ -48,17 +50,19 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ categories, setCatego
         <h2 className="text-lg font-semibold text-slate-800 mb-4">Add New Category</h2>
         <div className="flex items-start gap-4">
           <div className="flex-grow">
+            <label htmlFor="new-category-name" className="block text-sm font-medium text-slate-700">Category Name <span className="text-red-500">*</span></label>
             <input
+              id="new-category-name"
               type="text"
               value={newCategory}
               onChange={(e) => { setNewCategory(e.target.value); setError(null); }}
               onKeyPress={(e) => e.key === 'Enter' && addCategory()}
               placeholder="e.g., E-commerce, Healthcare"
-              className={`block w-full rounded-md shadow-sm sm:text-sm ${error ? 'border-red-500 ring-red-500' : 'border-slate-300 focus:border-emerald-500 focus:ring-emerald-500'}`}
+              className={`mt-1 ${inputClasses} ${error ? 'border-red-500' : ''}`}
             />
             {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
           </div>
-          <button onClick={addCategory} className="inline-flex items-center justify-center gap-2 rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+          <button onClick={addCategory} className="self-end inline-flex items-center justify-center gap-2 rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
             <IconPlus /> Add
           </button>
         </div>

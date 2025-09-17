@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import type { LogEntry } from '../types';
 import { IconSearch, IconChevronDown, IconTrash } from '../constants';
 
+const inputClasses = "block w-full text-sm rounded-md border-slate-300 bg-slate-50 shadow-sm focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-slate-200 disabled:cursor-not-allowed";
+
 const LogDetail: React.FC<{ log: LogEntry }> = ({ log }) => {
     const renderJson = (data: any) => {
         if (typeof data === 'string') return <pre className="bg-slate-800 text-white p-3 rounded-md text-xs whitespace-pre-wrap break-all">{data}</pre>;
@@ -49,7 +51,7 @@ const LogViewer: React.FC<LogViewerProps> = ({ logs, setLogs }) => {
             <div className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm border border-slate-200">
                 <div className="relative flex-grow">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><IconSearch /></div>
-                    <input type="text" placeholder="Search by URL or method..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"/>
+                    <input type="text" placeholder="Search by URL or method..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={`w-full pl-10 pr-4 py-2 ${inputClasses}`}/>
                 </div>
                 <button onClick={() => setLogs([])} className="inline-flex items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-800"><IconTrash/> Clear Logs</button>
             </div>

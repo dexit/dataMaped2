@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import type { OutgoingRoute, Mapping, EgressTransform, OutgoingAuthentication } from '../types';
 import { IconPlus, IconTrash, IconPencil, OUTGOING_AUTH_TYPES, API_KEY_LOCATIONS } from '../constants';
 
+const inputClasses = "block w-full text-sm rounded-md border-slate-300 bg-slate-50 shadow-sm focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-slate-200 disabled:cursor-not-allowed";
+
 // --- Reusable Modal Component ---
 const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode; footer?: React.ReactNode; }> = ({ isOpen, onClose, title, children, footer }) => {
     if (!isOpen) return null;
@@ -39,12 +41,12 @@ const EgressTransformEditor: React.FC<{transforms: EgressTransform[], setTransfo
             </div>
             {transforms.map((transform, i) => (
                 <div key={transform.id} className="flex items-center gap-2 p-2 bg-slate-100 rounded">
-                    <select value={transform.action} onChange={e => updateTransform(i, {...transform, action: e.target.value as any})} className="text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                    <select value={transform.action} onChange={e => updateTransform(i, {...transform, action: e.target.value as any})} className={inputClasses}>
                         <option value="set">Set</option>
                         <option value="remove">Remove</option>
                     </select>
-                    <input type="text" placeholder="body.metadata.timestamp" value={transform.path} onChange={e => updateTransform(i, {...transform, path: e.target.value})} className="flex-grow text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 font-mono" />
-                    {transform.action === 'set' && <input type="text" placeholder="Value" value={transform.value} onChange={e => updateTransform(i, {...transform, value: e.target.value})} className="flex-grow text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" />}
+                    <input type="text" placeholder="body.metadata.timestamp" value={transform.path} onChange={e => updateTransform(i, {...transform, path: e.target.value})} className={`flex-grow font-mono ${inputClasses}`} />
+                    {transform.action === 'set' && <input type="text" placeholder="Value" value={transform.value} onChange={e => updateTransform(i, {...transform, value: e.target.value})} className={`flex-grow ${inputClasses}`} />}
                     <button onClick={() => removeTransform(transform.id)} className="text-slate-500 p-2 rounded-full hover:bg-slate-200 hover:text-red-600"><IconTrash/></button>
                 </div>
             ))}
@@ -65,25 +67,25 @@ const OutgoingAuthEditor: React.FC<{auth: OutgoingAuthentication, setAuth: (a: O
     return (
         <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
             <h3 className="text-sm font-medium text-slate-700 mb-2">Authentication</h3>
-            <select value={auth.type} onChange={e => handleTypeChange(e.target.value as any)} className="w-full text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 mb-3">
+            <select value={auth.type} onChange={e => handleTypeChange(e.target.value as any)} className={`${inputClasses} mb-3`}>
                 {OUTGOING_AUTH_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
             </select>
             {auth.type === 'api-key' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <select value={auth.location} onChange={e => setAuth({...auth, location: e.target.value as any})} className="text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                    <select value={auth.location} onChange={e => setAuth({...auth, location: e.target.value as any})} className={inputClasses}>
                         {API_KEY_LOCATIONS.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
                     </select>
-                    <input type="text" placeholder="Param Name" value={auth.paramName} onChange={e => setAuth({...auth, paramName: e.target.value})} className="text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"/>
-                    <input type="password" placeholder="API Key Value" value={auth.apiKey} onChange={e => setAuth({...auth, apiKey: e.target.value})} className="md:col-span-2 text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"/>
+                    <input type="text" placeholder="Param Name" value={auth.paramName} onChange={e => setAuth({...auth, paramName: e.target.value})} className={inputClasses}/>
+                    <input type="password" placeholder="API Key Value" value={auth.apiKey} onChange={e => setAuth({...auth, apiKey: e.target.value})} className={`md:col-span-2 ${inputClasses}`}/>
                 </div>
             )}
             {auth.type === 'bearer' && (
-                <input type="password" placeholder="Bearer Token" value={auth.token} onChange={e => setAuth({...auth, token: e.target.value})} className="w-full text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"/>
+                <input type="password" placeholder="Bearer Token" value={auth.token} onChange={e => setAuth({...auth, token: e.target.value})} className={inputClasses}/>
             )}
             {auth.type === 'basic' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input type="text" placeholder="Username" value={auth.username} onChange={e => setAuth({...auth, username: e.target.value})} className="text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"/>
-                    <input type="password" placeholder="Password" value={auth.password} onChange={e => setAuth({...auth, password: e.target.value})} className="text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"/>
+                    <input type="text" placeholder="Username" value={auth.username} onChange={e => setAuth({...auth, username: e.target.value})} className={inputClasses}/>
+                    <input type="password" placeholder="Password" value={auth.password} onChange={e => setAuth({...auth, password: e.target.value})} className={inputClasses}/>
                 </div>
             )}
         </div>
@@ -122,6 +124,16 @@ const OutgoingRoutesManager: React.FC<OutgoingRoutesManagerProps> = ({ outgoingR
             showToast('Route Name and Target URL are required.', 'error');
             return;
         }
+        
+        try {
+            const url = new URL(editingRoute.targetUrl);
+            if (url.protocol !== "http:" && url.protocol !== "https:") {
+                throw new Error("Invalid protocol");
+            }
+        } catch (_) {
+            showToast('Please enter a valid Target URL (e.g., https://api.example.com).', 'error');
+            return;
+        }
 
         const isEditing = outgoingRoutes.some(r => r.id === editingRoute.id);
         if (isEditing) {
@@ -158,12 +170,12 @@ const OutgoingRoutesManager: React.FC<OutgoingRoutesManagerProps> = ({ outgoingR
             {isModalOpen && editingRoute && (
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={outgoingRoutes.some(r => r.id === editingRoute.id) ? 'Edit Outgoing Route' : 'Add Outgoing Route'} footer={modalFooter}>
                     <div className="space-y-6">
-                        <div><label className="block text-sm font-medium text-slate-700">Route Name</label><input type="text" placeholder="e.g., Forward to User Service" value={editingRoute.name} onChange={e => setEditingRoute({...editingRoute, name: e.target.value})} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"/></div>
-                        <div><label className="block text-sm font-medium text-slate-700">Target URL</label><input type="text" placeholder="https://api.example.com/v1/users" value={editingRoute.targetUrl} onChange={e => setEditingRoute({...editingRoute, targetUrl: e.target.value})} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm font-mono"/></div>
+                        <div><label className="block text-sm font-medium text-slate-700">Route Name <span className="text-red-500">*</span></label><input type="text" placeholder="e.g., Forward to User Service" value={editingRoute.name} onChange={e => setEditingRoute({...editingRoute, name: e.target.value})} className={`mt-1 ${inputClasses}`}/></div>
+                        <div><label className="block text-sm font-medium text-slate-700">Target URL <span className="text-red-500">*</span></label><input type="text" placeholder="https://api.example.com/v1/users" value={editingRoute.targetUrl} onChange={e => setEditingRoute({...editingRoute, targetUrl: e.target.value})} className={`mt-1 font-mono ${inputClasses}`}/></div>
                         
                         <OutgoingAuthEditor auth={editingRoute.authentication} setAuth={auth => setEditingRoute({...editingRoute, authentication: auth})} />
 
-                        <div><label className="block text-sm font-medium text-slate-700">Apply Mapping (optional)</label><select value={editingRoute.mappingId ?? ""} onChange={e => setEditingRoute({...editingRoute, mappingId: e.target.value || null})} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"><option value="">-- No Mapping --</option>{mappings.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select></div>
+                        <div><label className="block text-sm font-medium text-slate-700">Apply Mapping (optional)</label><select value={editingRoute.mappingId ?? ""} onChange={e => setEditingRoute({...editingRoute, mappingId: e.target.value || null})} className={`mt-1 ${inputClasses}`}><option value="">-- No Mapping --</option>{mappings.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select></div>
                         <EgressTransformEditor transforms={editingRoute.egressTransforms} setTransforms={t => setEditingRoute({...editingRoute, egressTransforms: t})} />
                     </div>
                 </Modal>

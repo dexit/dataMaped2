@@ -4,6 +4,8 @@ import type { ApiClient, Mapping, ApiClientHeader } from '../types';
 import { API_METHODS, AUTH_TYPES } from '../constants';
 import { IconPlay, IconPlus, IconTrash, IconChevronDown, IconSearch, IconPencil } from '../constants';
 
+const inputClasses = "block w-full text-sm rounded-md border-slate-300 bg-slate-50 shadow-sm focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-slate-200 disabled:cursor-not-allowed";
+
 const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode; footer?: React.ReactNode; }> = ({ isOpen, onClose, title, children, footer }) => {
     if (!isOpen) return null;
     return (
@@ -38,32 +40,32 @@ const ApiClientForm: React.FC<{
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700">URL</label>
-                    <input type="text" placeholder="e.g., /api/users or https://..." value={client.url} onChange={e => setClient({ ...client, url: e.target.value })} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm" />
+                    <label className="block text-sm font-medium text-slate-700">URL <span className="text-red-500">*</span></label>
+                    <input type="text" placeholder="e.g., /api/users or https://..." value={client.url} onChange={e => setClient({ ...client, url: e.target.value })} className={`mt-1 ${inputClasses}`} />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-slate-700">Method</label>
-                    <select value={client.method} onChange={e => setClient({ ...client, method: e.target.value as any })} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm">{API_METHODS.map(m => <option key={m} value={m}>{m}</option>)}</select>
+                    <select value={client.method} onChange={e => setClient({ ...client, method: e.target.value as any })} className={`mt-1 ${inputClasses}`}>{API_METHODS.map(m => <option key={m} value={m}>{m}</option>)}</select>
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-slate-700">Auth Type</label>
-                    <select value={client.authType} onChange={e => setClient({ ...client, authType: e.target.value as any })} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm">{AUTH_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
+                    <select value={client.authType} onChange={e => setClient({ ...client, authType: e.target.value as any })} className={`mt-1 ${inputClasses}`}>{AUTH_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
                 </div>
                 <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700">Mapping</label>
-                    <select value={client.mappingId ?? ""} onChange={e => setClient({ ...client, mappingId: e.target.value || null })} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"><option value="">No Mapping (for proxy testing)</option>{mappings.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
+                    <select value={client.mappingId ?? ""} onChange={e => setClient({ ...client, mappingId: e.target.value || null })} className={`mt-1 ${inputClasses}`}><option value="">No Mapping (for proxy testing)</option>{mappings.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
                 </div>
                 <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700">Request Body (JSON)</label>
-                    <textarea placeholder="{}" value={client.body} onChange={e => setClient({ ...client, body: e.target.value })} rows={4} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm font-mono"></textarea>
+                    <textarea placeholder="{}" value={client.body} onChange={e => setClient({ ...client, body: e.target.value })} rows={4} className={`mt-1 font-mono ${inputClasses}`}></textarea>
                 </div>
             </div>
             <div className="space-y-2">
                 <h3 className="text-sm font-medium text-slate-700">Headers</h3>
                 {client.headers.map((header, index) => (
                     <div key={header.id} className="flex items-center gap-2">
-                        <input type="text" placeholder="Key" value={header.key} onChange={e => handleHeaderChange(index, 'key', e.target.value)} className="w-full text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" />
-                        <input type="text" placeholder="Value" value={header.value} onChange={e => handleHeaderChange(index, 'value', e.target.value)} className="w-full text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                        <input type="text" placeholder="Key" value={header.key} onChange={e => handleHeaderChange(index, 'key', e.target.value)} className={inputClasses} />
+                        <input type="text" placeholder="Value" value={header.value} onChange={e => handleHeaderChange(index, 'value', e.target.value)} className={inputClasses} />
                         <button onClick={() => removeHeader(header.id)} className="text-slate-500 p-2 rounded-full hover:bg-slate-100 hover:text-red-600"><IconTrash /></button>
                     </div>
                 ))}
@@ -151,7 +153,7 @@ const ApiClientComponent: React.FC<ApiClientComponentProps> = ({ apiClients, set
       <div className="flex flex-col md:flex-row items-center gap-4 p-4 bg-white rounded-lg shadow-sm border border-slate-200">
         <div className="relative flex-grow w-full md:w-auto">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><IconSearch /></div>
-            <input type="text" placeholder="Search by URL..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"/>
+            <input type="text" placeholder="Search by URL..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={`w-full pl-10 pr-4 py-2 ${inputClasses}`}/>
         </div>
         <button onClick={openAddModal} className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"><IconPlus /> Add Client</button>
       </div>
