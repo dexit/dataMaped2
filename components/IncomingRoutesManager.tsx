@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import type { IncomingRoute, OutgoingRoute, Condition, ConditionGroup, ConditionOperator, IncomingAuthentication, ApiClientHeader } from '../types';
-import { INCOMING_METHODS, CONDITION_OPERATORS, IconPlus, IconTrash, IconPencil, INCOMING_AUTH_TYPES, API_KEY_LOCATIONS } from '../constants';
+import { INCOMING_METHODS, CONDITION_OPERATORS, IconPlus, IconTrash, IconPencil, INCOMING_AUTH_TYPES, API_KEY_LOCATIONS, IconSearch } from '../constants';
 
 // --- Reusable Modal Component ---
 const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode; footer?: React.ReactNode; }> = ({ isOpen, onClose, title, children, footer }) => {
@@ -136,6 +136,7 @@ interface IncomingRoutesManagerProps {
 const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingRoutes, setIncomingRoutes, outgoingRoutes, showConfirmation, showToast }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRoute, setEditingRoute] = useState<IncomingRoute | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const openAddModal = () => {
         setEditingRoute({
@@ -170,6 +171,11 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
     const handleSave = () => {
         if (!editingRoute || !editingRoute.name || !editingRoute.path) {
             showToast('Route Name and Path are required.', 'error');
+            return;
+        }
+
+        if (!editingRoute.path.startsWith('/')) {
+            showToast('Path must start with a forward slash (/).', 'error');
             return;
         }
 
@@ -212,6 +218,11 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
         });
     };
     
+    const filteredRoutes = incomingRoutes.filter(route =>
+        route.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        route.path.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     const modalFooter = <button onClick={handleSave} className="inline-flex items-center justify-center gap-2 rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">Save Route</button>;
     
     return (
@@ -220,10 +231,22 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
                 <h1 className="text-3xl font-bold text-slate-900">Incoming Routes</h1>
                 <p className="text-slate-600 mt-1">Define endpoints for the proxy to intercept. Requests are matched from top to bottom.</p>
             </header>
-
-            <button onClick={openAddModal} className="inline-flex items-center gap-2 rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
-                <IconPlus /> Add Incoming Route
-            </button>
+            
+            <div className="flex flex-col md:flex-row items-center gap-4 p-4 bg-white rounded-lg shadow-sm border border-slate-200">
+                <div className="relative flex-grow w-full md:w-auto">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><IconSearch /></div>
+                    <input 
+                        type="text" 
+                        placeholder="Search by name or path..." 
+                        value={searchTerm} 
+                        onChange={e => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                </div>
+                <button onClick={openAddModal} className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                    <IconPlus /> Add Incoming Route
+                </button>
+            </div>
             
             {isModalOpen && editingRoute && (
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={incomingRoutes.some(r => r.id === editingRoute.id) ? 'Edit Incoming Route' : 'Add Incoming Route'} footer={modalFooter}>
@@ -281,7 +304,14 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
                     <table className="min-w-full divide-y divide-slate-200">
                         <thead className="bg-slate-100"><tr><th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Name</th><th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Method & Path</th><th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Type</th><th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Auth</th><th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Routes To</th><th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Actions</th></tr></thead>
                         <tbody className="bg-white divide-y divide-slate-200">
-                            {incomingRoutes.map(route => (
+                            {filteredRoutes.length === 0 && (
+                                <tr>
+                                    <td colSpan={6} className="text-center py-8 text-slate-500">
+                                        No routes match your search criteria.
+                                    </td>
+                                </tr>
+                            )}
+                            {filteredRoutes.map(route => (
                                 <tr key={route.id} className="hover:bg-emerald-50/50">
                                     <td className="px-6 py-4 text-sm font-medium text-slate-800">{route.name}</td>
                                     <td className="px-6 py-4 text-sm text-slate-600"><span className="font-bold text-emerald-800 bg-emerald-100 px-2 py-1 rounded-full text-xs">{route.method}</span> <span className="font-mono ml-2">{route.path}</span></td>
