@@ -42,10 +42,10 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ categories, setCatego
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800">Manage Categories</h1>
+      <h1 className="text-3xl font-bold text-slate-900">Manage Categories</h1>
 
-      <div className="bg-white rounded-lg shadow p-6 max-w-2xl">
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">Add New Category</h2>
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 max-w-2xl">
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">Add New Category</h2>
         <div className="flex items-start gap-4">
           <div className="flex-grow">
             <input
@@ -54,37 +54,37 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ categories, setCatego
               onChange={(e) => { setNewCategory(e.target.value); setError(null); }}
               onKeyPress={(e) => e.key === 'Enter' && addCategory()}
               placeholder="e.g., E-commerce, Healthcare"
-              className={`block w-full rounded-md shadow-sm sm:text-sm ${error ? 'border-red-500 ring-red-500' : 'border-gray-300 focus:border-sky-500 focus:ring-sky-500'}`}
+              className={`block w-full rounded-md shadow-sm sm:text-sm ${error ? 'border-red-500 ring-red-500' : 'border-slate-300 focus:border-emerald-500 focus:ring-emerald-500'}`}
             />
             {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
           </div>
-          <button onClick={addCategory} className="inline-flex items-center gap-2 rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
+          <button onClick={addCategory} className="inline-flex items-center justify-center gap-2 rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
             <IconPlus /> Add
           </button>
         </div>
       </div>
       
       {categories.length === 0 ? (
-          <div className="text-center py-10 px-6 bg-white rounded-lg shadow max-w-2xl">
+          <div className="text-center py-10 px-6 bg-white rounded-lg shadow-sm border border-dashed border-slate-300 max-w-2xl">
             <IconCategory />
-            <h3 className="text-lg font-semibold text-gray-800 mt-4">No Categories Found</h3>
-            <p className="text-sm text-gray-500 mt-1">Create categories to organize your data mappings.</p>
+            <h3 className="text-lg font-semibold text-slate-800 mt-4">No Categories Found</h3>
+            <p className="text-sm text-slate-500 mt-1">Create categories to organize your data mappings.</p>
           </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden max-w-2xl">
-            <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden max-w-2xl">
+            <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-100">
                 <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Name</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-slate-200">
                 {categories.map((category) => (
                 <tr key={category.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{category.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">{category.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button onClick={() => removeCategory(category.id, category.name)} className="text-red-600 hover:text-red-900 inline-flex items-center gap-1">
+                    <button onClick={() => removeCategory(category.id, category.name)} className="text-red-600 hover:text-red-800 inline-flex items-center gap-1 font-semibold">
                         <IconTrash /> Delete
                     </button>
                     </td>

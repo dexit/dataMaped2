@@ -22,22 +22,22 @@ const ConfirmationModal: React.FC<{
   if (!config.isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4 animate-fade-in-down">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md m-4" onClick={e => e.stopPropagation()}>
         <div className="p-6">
           <div className="flex items-start gap-4">
-            <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+            <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-50 sm:mx-0 sm:h-10 sm:w-10">
                 <IconAlertTriangle />
             </div>
             <div className="mt-0 text-left">
-              <h3 className="text-lg leading-6 font-bold text-gray-900">{config.title}</h3>
-              <p className="mt-2 text-sm text-gray-600">{config.message}</p>
+              <h3 className="text-lg leading-6 font-bold text-slate-900">{config.title}</h3>
+              <p className="mt-2 text-sm text-slate-600">{config.message}</p>
             </div>
           </div>
         </div>
-        <div className="bg-gray-50 px-6 py-4 flex flex-row-reverse gap-3 rounded-b-lg">
-          <button onClick={onConfirm} className="rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Confirm</button>
-          <button onClick={onClose} className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">Cancel</button>
+        <div className="bg-slate-50 px-6 py-4 flex flex-row-reverse gap-3 rounded-b-lg">
+          <button onClick={onConfirm} className="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Confirm</button>
+          <button onClick={onClose} className="inline-flex justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">Cancel</button>
         </div>
       </div>
     </div>
@@ -129,9 +129,9 @@ const App: React.FC = () => {
     <li>
       <button
         onClick={() => setCurrentView(view)}
-        className={`w-full flex items-center text-left py-2.5 px-4 rounded-lg text-sm transition-colors duration-200 ${
+        className={`w-full flex items-center text-left py-2.5 px-4 rounded-lg text-sm font-semibold transition-colors duration-200 ${
           currentView === view
-            ? 'bg-sky-600 text-white font-semibold shadow'
+            ? 'bg-emerald-600 text-white shadow'
             : 'text-slate-300 hover:bg-slate-700/75 hover:text-white'
         }`}
       >
@@ -142,17 +142,17 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="flex h-screen font-sans text-slate-800">
+    <div className="flex h-screen text-slate-800">
       <ConfirmationModal config={confirmation} onClose={() => setConfirmation(prev => ({...prev, isOpen: false}))} onConfirm={confirmation.onConfirm} />
       {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-semibold animate-fade-in-down ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
+        <div className={`fixed top-5 right-5 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-semibold animate-fade-in-down ${toast.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'}`}>
           {toast.message}
         </div>
       )}
 
       <aside className="bg-slate-800 text-white w-64 p-4 flex flex-col shrink-0">
         <div className="text-2xl font-bold text-white mb-8 flex items-center gap-3 px-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <span>Data Mapper</span>
         </div>
         <nav className="flex-grow">

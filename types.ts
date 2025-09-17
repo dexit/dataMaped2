@@ -103,8 +103,17 @@ export interface IncomingRoute {
   path: string; // e.g., /users/:id
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'ANY';
   conditions: ConditionGroup;
-  outgoingRouteId: string | null;
   authentication: IncomingAuthentication;
+  
+  responseMode: 'proxy' | 'mock';
+
+  // For 'proxy' mode
+  outgoingRouteId?: string | null;
+
+  // For 'mock' mode
+  mockResponseStatusCode?: number;
+  mockResponseHeaders?: ApiClientHeader[];
+  mockResponseBody?: string;
 }
 
 export interface EgressTransform {

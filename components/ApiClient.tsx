@@ -1,18 +1,20 @@
+
 import React, { useState, useEffect } from 'react';
 import type { ApiClient, Mapping, ApiClientHeader } from '../types';
 import { API_METHODS, AUTH_TYPES } from '../constants';
 import { IconPlay, IconPlus, IconTrash, IconChevronDown, IconSearch, IconPencil } from '../constants';
 
-const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode; }> = ({ isOpen, onClose, title, children }) => {
+const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode; footer?: React.ReactNode; }> = ({ isOpen, onClose, title, children, footer }) => {
     if (!isOpen) return null;
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-start p-4" onClick={onClose}>
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 my-8 overflow-y-auto" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h2 className="text-xl font-bold text-gray-800">{title}</h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-3xl leading-none">&times;</button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-start p-4 animate-fade-in-down" onClick={onClose}>
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl m-4 my-8 max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center border-b border-slate-200 p-4 flex-shrink-0">
+                    <h2 className="text-lg font-bold text-slate-800">{title}</h2>
+                    <button onClick={onClose} className="text-slate-400 hover:text-slate-700 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100">&times;</button>
                 </div>
-                {children}
+                <div className="p-6 overflow-y-auto">{children}</div>
+                {footer && <div className="bg-slate-50 border-t border-slate-200 p-4 flex justify-end gap-3 rounded-b-lg">{footer}</div>}
             </div>
         </div>
     );
@@ -33,24 +35,39 @@ const ApiClientForm: React.FC<{
     const removeHeader = (id: string) => setClient(prev => ({ ...prev, headers: prev.headers.filter(h => h.id !== id) }));
     
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" placeholder="URL (e.g., /api/users or https://...)" value={client.url} onChange={e => setClient({ ...client, url: e.target.value })} className="md:col-span-2 w-full text-sm rounded-md border-gray-300" />
-                <select value={client.method} onChange={e => setClient({ ...client, method: e.target.value as any })} className="w-full text-sm rounded-md border-gray-300">{API_METHODS.map(m => <option key={m} value={m}>{m}</option>)}</select>
-                <select value={client.authType} onChange={e => setClient({ ...client, authType: e.target.value as any })} className="w-full text-sm rounded-md border-gray-300">{AUTH_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
-                <select value={client.mappingId ?? ""} onChange={e => setClient({ ...client, mappingId: e.target.value || null })} className="md:col-span-2 w-full text-sm rounded-md border-gray-300"><option value="">No Mapping (for proxy testing)</option>{mappings.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
-                <textarea placeholder="Request Body (JSON)" value={client.body} onChange={e => setClient({ ...client, body: e.target.value })} rows={4} className="md:col-span-2 w-full text-sm rounded-md border-gray-300 font-mono"></textarea>
+                <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700">URL</label>
+                    <input type="text" placeholder="e.g., /api/users or https://..." value={client.url} onChange={e => setClient({ ...client, url: e.target.value })} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-700">Method</label>
+                    <select value={client.method} onChange={e => setClient({ ...client, method: e.target.value as any })} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm">{API_METHODS.map(m => <option key={m} value={m}>{m}</option>)}</select>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-700">Auth Type</label>
+                    <select value={client.authType} onChange={e => setClient({ ...client, authType: e.target.value as any })} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm">{AUTH_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
+                </div>
+                <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700">Mapping</label>
+                    <select value={client.mappingId ?? ""} onChange={e => setClient({ ...client, mappingId: e.target.value || null })} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm"><option value="">No Mapping (for proxy testing)</option>{mappings.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
+                </div>
+                <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700">Request Body (JSON)</label>
+                    <textarea placeholder="{}" value={client.body} onChange={e => setClient({ ...client, body: e.target.value })} rows={4} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm font-mono"></textarea>
+                </div>
             </div>
             <div className="space-y-2">
-                <h3 className="text-sm font-medium text-gray-700">Headers</h3>
+                <h3 className="text-sm font-medium text-slate-700">Headers</h3>
                 {client.headers.map((header, index) => (
                     <div key={header.id} className="flex items-center gap-2">
-                        <input type="text" placeholder="Key" value={header.key} onChange={e => handleHeaderChange(index, 'key', e.target.value)} className="w-full text-sm rounded-md border-gray-300" />
-                        <input type="text" placeholder="Value" value={header.value} onChange={e => handleHeaderChange(index, 'value', e.target.value)} className="w-full text-sm rounded-md border-gray-300" />
-                        <button onClick={() => removeHeader(header.id)} className="text-red-500 p-1 rounded-full hover:bg-red-100"><IconTrash /></button>
+                        <input type="text" placeholder="Key" value={header.key} onChange={e => handleHeaderChange(index, 'key', e.target.value)} className="w-full text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                        <input type="text" placeholder="Value" value={header.value} onChange={e => handleHeaderChange(index, 'value', e.target.value)} className="w-full text-sm rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                        <button onClick={() => removeHeader(header.id)} className="text-slate-500 p-2 rounded-full hover:bg-slate-100 hover:text-red-600"><IconTrash /></button>
                     </div>
                 ))}
-                <button onClick={addHeader} className="text-sm text-sky-600 hover:text-sky-800">Add Header</button>
+                <button onClick={addHeader} className="text-sm font-semibold text-emerald-600 hover:text-emerald-700">+ Add Header</button>
             </div>
         </div>
     );
@@ -118,68 +135,71 @@ const ApiClientComponent: React.FC<ApiClientComponentProps> = ({ apiClients, set
 
   const filteredApiClients = apiClients.filter(c => c.url.toLowerCase().includes(searchTerm.toLowerCase()));
 
+  const modalFooter = <button onClick={handleSaveClient} className="inline-flex items-center justify-center gap-2 rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">Save Client</button>;
+
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800">API Clients</h1>
-      <p className="text-gray-600 -mt-4">Use this to test your incoming routes or any external API.</p>
+      <header>
+        <h1 className="text-3xl font-bold text-slate-900">API Clients</h1>
+        <p className="text-slate-600 mt-1">Use this to test your incoming routes or any external API.</p>
+      </header>
       
-      <Modal isOpen={isModalOpen && editingClient !== null} onClose={() => setIsModalOpen(false)} title={(editingClient && 'id' in editingClient) ? 'Edit API Client' : 'Add New API Client'}>
+      <Modal isOpen={isModalOpen && editingClient !== null} onClose={() => setIsModalOpen(false)} title={(editingClient && 'id' in editingClient) ? 'Edit API Client' : 'Add New API Client'} footer={modalFooter}>
           <ApiClientForm client={editingClient!} setClient={setEditingClient as any} mappings={mappings} />
-          <div className="flex justify-end pt-6">
-              <button onClick={handleSaveClient} className="inline-flex items-center gap-2 rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700">Save Client</button>
-          </div>
       </Modal>
 
-      <div className="flex flex-col md:flex-row items-center gap-4">
-        <button onClick={openAddModal} className="inline-flex items-center gap-2 rounded-md bg-sky-600 px-4 py-2 text-sm text-white shadow-sm hover:bg-sky-700 w-full md:w-auto"><IconPlus /> Add Client</button>
+      <div className="flex flex-col md:flex-row items-center gap-4 p-4 bg-white rounded-lg shadow-sm border border-slate-200">
         <div className="relative flex-grow w-full md:w-auto">
-            <input type="text" placeholder="Search by URL..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-md border-gray-300 shadow-sm"/>
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><IconSearch /></div>
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><IconSearch /></div>
+            <input type="text" placeholder="Search by URL..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"/>
         </div>
+        <button onClick={openAddModal} className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"><IconPlus /> Add Client</button>
       </div>
       
        {apiClients.length === 0 ? (
-           <div className="text-center py-10 px-6 bg-white rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-gray-800">No API Clients Created</h3>
-                <p className="text-sm text-gray-500 mt-1">Add a client to test your local routes or any API endpoint.</p>
-                <div className="mt-6"><button onClick={openAddModal} className="inline-flex items-center gap-2 rounded-md bg-sky-600 px-4 py-2 text-sm text-white shadow-sm hover:bg-sky-700"><IconPlus /> Add Your First Client</button></div>
+           <div className="text-center py-10 px-6 bg-white rounded-lg shadow-sm border border-dashed border-slate-300">
+                <h3 className="text-lg font-semibold text-slate-800">No API Clients Created</h3>
+                <p className="text-sm text-slate-500 mt-1">Add a client to test your local routes or any API endpoint.</p>
+                <div className="mt-6"><button onClick={openAddModal} className="inline-flex items-center justify-center gap-2 rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"><IconPlus /> Add Your First Client</button></div>
            </div>
        ) : (
-       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+       <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+        <table className="min-w-full divide-y divide-slate-200">
+          <thead className="bg-slate-100">
             <tr>
-              <th className="w-10 px-6 py-3"></th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">URL</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Run</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+              <th className="w-10 px-4 py-3"></th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">URL</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Method</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Last Run</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Status</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-slate-200">
             {filteredApiClients.map(client => (
                 <React.Fragment key={client.id}>
-                    <tr className="hover:bg-slate-50">
-                        <td className="px-6 py-4"><button onClick={() => setExpandedClientId(prev => prev === client.id ? null : client.id)} className={`text-gray-400 hover:text-gray-700 transform ${expandedClientId === client.id ? 'rotate-180' : ''}`}><IconChevronDown/></button></td>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-900 truncate max-w-xs">{client.url}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{client.method}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{client.lastRun ? new Date(client.lastRun).toLocaleString() : 'Never'}</td>
-                        <td className="px-6 py-4 text-sm font-bold">{client.status ? <span className={`${client.status >= 200 && client.status < 300 ? 'text-green-600' : 'text-red-600'}`}>{client.status}</span> : 'N/A'}</td>
-                        <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
-                            <button onClick={() => runTest(client.id)} disabled={runningClientId === client.id} className="text-green-600 hover:text-green-900 inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-wait">
-                                {runningClientId === client.id ? <div className="w-4 h-4 border-2 border-t-green-500 border-gray-200 rounded-full animate-spin"></div> : <IconPlay/>}
+                    <tr className="hover:bg-emerald-50/50">
+                        <td className="px-4 py-2"><button onClick={() => setExpandedClientId(prev => prev === client.id ? null : client.id)} className={`text-slate-400 hover:text-slate-700 transform ${expandedClientId === client.id ? 'rotate-180' : ''}`}><IconChevronDown/></button></td>
+                        <td className="px-4 py-2 text-sm font-medium text-slate-800 truncate max-w-xs">{client.url}</td>
+                        <td className="px-4 py-2 text-sm text-slate-600">{client.method}</td>
+                        <td className="px-4 py-2 text-sm text-slate-600">{client.lastRun ? new Date(client.lastRun).toLocaleString() : 'Never'}</td>
+                        <td className="px-4 py-2 text-sm font-bold">{client.status ? <span className={`${client.status >= 200 && client.status < 300 ? 'text-emerald-600' : 'text-red-600'}`}>{client.status}</span> : <span className="text-slate-500">N/A</span>}</td>
+                        <td className="px-4 py-2 text-right text-sm font-medium">
+                          <div className="flex justify-end items-center gap-2">
+                            <button onClick={() => runTest(client.id)} disabled={runningClientId === client.id} className="inline-flex items-center gap-1.5 rounded-md border border-emerald-300 bg-white px-3 py-1.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-wait">
+                                {runningClientId === client.id ? <div className="w-4 h-4 border-2 border-t-emerald-500 border-slate-200 rounded-full animate-spin"></div> : <IconPlay/>}
                                 Run
                             </button>
-                            <button onClick={() => openEditModal(client)} className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1"><IconPencil/> Edit</button>
-                            <button onClick={() => removeApiClient(client.id)} className="text-red-600 hover:text-red-900 inline-flex items-center gap-1"><IconTrash/> Delete</button>
+                            <button onClick={() => openEditModal(client)} className="text-slate-500 p-2 rounded-full hover:bg-slate-200 hover:text-blue-600"><IconPencil/></button>
+                            <button onClick={() => removeApiClient(client.id)} className="text-slate-500 p-2 rounded-full hover:bg-slate-200 hover:text-red-600"><IconTrash/></button>
+                          </div>
                         </td>
                     </tr>
                     {expandedClientId === client.id && (
                         <tr>
                             <td colSpan={6} className="p-0"><div className="bg-slate-100 p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div> <h4 className="font-semibold text-gray-700 mb-2">Request Body</h4> <pre className="bg-gray-800 text-white p-2 rounded-md text-xs max-h-40 overflow-auto">{client.body || 'No body'}</pre> </div>
-                                <div> <h4 className="font-semibold text-gray-700 mb-2">Response Body</h4> <pre className="bg-gray-800 text-white p-2 rounded-md text-xs max-h-40 overflow-auto">{client.responseBody || 'No response yet'}</pre> </div>
+                                <div> <h4 className="font-semibold text-slate-700 mb-2">Request Body</h4> <pre className="bg-slate-800 text-white p-3 rounded-md text-xs max-h-40 overflow-auto">{client.body || <span className="text-slate-400">No body</span>}</pre> </div>
+                                <div> <h4 className="font-semibold text-slate-700 mb-2">Response Body</h4> <pre className="bg-slate-800 text-white p-3 rounded-md text-xs max-h-40 overflow-auto">{client.responseBody || <span className="text-slate-400">No response yet</span>}</pre> </div>
                             </div></td>
                         </tr>
                     )}

@@ -220,6 +220,38 @@ self.addEventListener('fetch', (event) => {
 
     log.incomingRoute = matchedIncomingRoute;
 
+    if (matchedIncomingRoute.responseMode === 'mock') {
+        const { mockResponseStatusCode = 200, mockResponseHeaders = [], mockResponseBody = '' } = matchedIncomingRoute;
+        
+        const headers = new Headers();
+        mockResponseHeaders.forEach(h => {
+            if (h.key) headers.set(h.key, h.value);
+        });
+        if (!headers.has('Content-Type')) {
+            headers.set('Content-Type', 'application/json');
+        }
+        headers.set('Access-Control-Allow-Origin', '*'); 
+
+        const mockResponse = new Response(mockResponseBody, {
+            status: mockResponseStatusCode,
+            headers: headers,
+        });
+        
+        log.response = {
+            status: mockResponseStatusCode,
+            statusText: 'Mocked Response',
+            headers: Object.fromEntries(headers.entries()),
+            body: mockResponseBody,
+        };
+        try {
+            log.response.body = JSON.parse(mockResponseBody);
+        } catch (e) {
+            // It's not JSON, so keep as string
+        }
+        logToClient(log);
+        return mockResponse;
+    }
+    
     const outgoingRoute = rules.outgoingRoutes.find(r => r.id === matchedIncomingRoute.outgoingRouteId);
     if (!outgoingRoute) {
         log.response = { status: 500, body: { error: 'Internal configuration error: Outgoing route not found.' } };
