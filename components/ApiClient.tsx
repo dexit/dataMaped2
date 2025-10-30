@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import type { ApiClient, Mapping, ApiClientHeader } from '../types';
-import { API_METHODS, AUTH_TYPES } from '../constants';
+import { API_METHODS, AUTH_TYPES, DEFAULT_INPUT_CLASSES, PRIMARY_BUTTON_CLASSES, SECONDARY_BUTTON_CLASSES, ICON_BUTTON_BASE_CLASSES, ICON_BUTTON_HOVER_INFO_CLASSES, ICON_BUTTON_HOVER_DANGER_CLASSES, ICON_BUTTON_HOVER_SLATE_CLASSES } from '../constants';
 import { IconPlay, IconPlus, IconTrash, IconChevronDown, IconSearch, IconPencil, IconApiClient } from '../constants';
 import Modal from './common/Modal'; // Use common Modal
 import EmptyState from './common/EmptyState'; // Use common EmptyState
-
-const inputClasses = "block w-full text-sm rounded-lg border-slate-300 bg-slate-50 shadow-sm focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-slate-200 disabled:cursor-not-allowed";
-const buttonPrimaryClasses = "inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors";
-const buttonSecondaryClasses = "inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors";
-const iconButtonClasses = "text-slate-500 p-2 rounded-full hover:bg-slate-100 hover:text-blue-600 transition-colors";
-const dangerIconButtonClasses = "text-slate-500 p-2 rounded-full hover:bg-slate-100 hover:text-red-600 transition-colors";
 
 
 const ApiClientForm: React.FC<{
@@ -31,32 +25,32 @@ const ApiClientForm: React.FC<{
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700 mb-1">URL <span className="text-red-500">*</span></label>
-                    <input type="text" placeholder="e.g., /api/users or https://..." value={client.url} onChange={e => setClient({ ...client, url: e.target.value })} className={`${inputClasses}`} />
+                    <input type="text" placeholder="e.g., /api/users or https://..." value={client.url} onChange={e => setClient({ ...client, url: e.target.value })} className={`${DEFAULT_INPUT_CLASSES}`} />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Method</label>
-                    <select value={client.method} onChange={e => setClient({ ...client, method: e.target.value as any })} className={`${inputClasses}`}>{API_METHODS.map(m => <option key={m} value={m}>{m}</option>)}</select>
+                    <select value={client.method} onChange={e => setClient({ ...client, method: e.target.value as any })} className={`${DEFAULT_INPUT_CLASSES}`}>{API_METHODS.map(m => <option key={m} value={m}>{m}</option>)}</select>
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Auth Type</label>
-                    <select value={client.authType} onChange={e => setClient({ ...client, authType: e.target.value as any })} className={`${inputClasses}`}>{AUTH_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
+                    <select value={client.authType} onChange={e => setClient({ ...client, authType: e.target.value as any })} className={`${DEFAULT_INPUT_CLASSES}`}>{AUTH_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select>
                 </div>
                 <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700 mb-1">Mapping</label>
-                    <select value={client.mappingId ?? ""} onChange={e => setClient({ ...client, mappingId: e.target.value || null })} className={`${inputClasses}`}><option value="">No Mapping (for proxy testing)</option>{mappings.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
+                    <select value={client.mappingId ?? ""} onChange={e => setClient({ ...client, mappingId: e.target.value || null })} className={`${DEFAULT_INPUT_CLASSES}`}><option value="">No Mapping (for proxy testing)</option>{mappings.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
                 </div>
                 <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700 mb-1">Request Body (JSON)</label>
-                    <textarea placeholder="{}" value={client.body} onChange={e => setClient({ ...client, body: e.target.value })} rows={4} className={`font-mono ${inputClasses}`}></textarea>
+                    <textarea placeholder="{}" value={client.body} onChange={e => setClient({ ...client, body: e.target.value })} rows={4} className={`font-mono ${DEFAULT_INPUT_CLASSES}`}></textarea>
                 </div>
             </div>
             <div className="space-y-2">
                 <h3 className="text-sm font-medium text-slate-700">Headers</h3>
                 {client.headers.map((header, index) => (
                     <div key={header.id} className="flex items-center gap-2">
-                        <input type="text" placeholder="Key" value={header.key} onChange={e => handleHeaderChange(index, 'key', e.target.value)} className={inputClasses} />
-                        <input type="text" placeholder="Value" value={header.value} onChange={e => handleHeaderChange(index, 'value', e.target.value)} className={inputClasses} />
-                        <button onClick={() => removeHeader(header.id)} className={dangerIconButtonClasses} title="Remove Header"><IconTrash /></button>
+                        <input type="text" placeholder="Key" value={header.key} onChange={e => handleHeaderChange(index, 'key', e.target.value)} className={DEFAULT_INPUT_CLASSES} />
+                        <input type="text" placeholder="Value" value={header.value} onChange={e => handleHeaderChange(index, 'value', e.target.value)} className={DEFAULT_INPUT_CLASSES} />
+                        <button onClick={() => removeHeader(header.id)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_DANGER_CLASSES}`} title="Remove Header"><IconTrash /></button>
                     </div>
                 ))}
                 <button onClick={addHeader} className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">+ Add Header</button>
@@ -127,7 +121,7 @@ const ApiClientComponent: React.FC<ApiClientComponentProps> = ({ apiClients, set
 
   const filteredApiClients = apiClients.filter(c => c.url.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const modalFooter = <button onClick={handleSaveClient} className={buttonPrimaryClasses}>Save Client</button>;
+  const modalFooter = <button onClick={handleSaveClient} className={PRIMARY_BUTTON_CLASSES}>Save Client</button>;
 
   return (
     <div className="space-y-8">
@@ -143,9 +137,9 @@ const ApiClientComponent: React.FC<ApiClientComponentProps> = ({ apiClients, set
       <div className="flex flex-col md:flex-row items-center gap-4 p-5 bg-white rounded-xl shadow-md border border-slate-200">
         <div className="relative flex-grow w-full md:w-auto">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><IconSearch /></div>
-            <input type="text" placeholder="Search by URL..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={`w-full pl-10 pr-4 py-2.5 ${inputClasses}`}/>
+            <input type="text" placeholder="Search by URL..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={`w-full pl-10 pr-4 py-2.5 ${DEFAULT_INPUT_CLASSES}`}/>
         </div>
-        <button onClick={openAddModal} className={`${buttonPrimaryClasses} w-full md:w-auto`}><IconPlus /> Add Client</button>
+        <button onClick={openAddModal} className={`${PRIMARY_BUTTON_CLASSES} w-full md:w-auto`}><IconPlus /> Add Client</button>
       </div>
       
        {apiClients.length === 0 ? (
@@ -153,7 +147,7 @@ const ApiClientComponent: React.FC<ApiClientComponentProps> = ({ apiClients, set
                 title="No API Clients Created" 
                 message="Add a client to test your local routes or any API endpoint." 
                 icon={<IconApiClient/>}
-                action={<button onClick={openAddModal} className={buttonPrimaryClasses}><IconPlus /> Add Your First Client</button>}
+                action={<button onClick={openAddModal} className={PRIMARY_BUTTON_CLASSES}><IconPlus /> Add Your First Client</button>}
            />
        ) : (
        <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
@@ -179,19 +173,20 @@ const ApiClientComponent: React.FC<ApiClientComponentProps> = ({ apiClients, set
             {filteredApiClients.map(client => (
                 <React.Fragment key={client.id}>
                     <tr className="hover:bg-emerald-50/10 transition-colors">
-                        <td className="px-4 py-3"><button onClick={() => setExpandedClientId(prev => prev === client.id ? null : client.id)} className={`text-slate-400 hover:text-slate-700 transform transition-transform ${expandedClientId === client.id ? 'rotate-180' : ''}`}><IconChevronDown/></button></td>
+                        {/* Fix: ICON_BUTTON_HOVER_SLATE_CLASSES should be correctly imported after this fix */}
+                        <td className="px-4 py-3"><button onClick={() => setExpandedClientId(prev => prev === client.id ? null : client.id)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_SLATE_CLASSES} transform ${expandedClientId === client.id ? 'rotate-180' : ''}`}><IconChevronDown/></button></td>
                         <td className="px-4 py-3 text-base font-medium text-slate-800 truncate max-w-xs">{client.url}</td>
                         <td className="px-4 py-3 text-sm text-slate-600">{client.method}</td>
                         <td className="px-4 py-3 text-sm text-slate-600">{client.lastRun ? new Date(client.lastRun).toLocaleString() : 'Never'}</td>
                         <td className="px-4 py-3 text-sm font-bold">{client.status ? <span className={`${client.status >= 200 && client.status < 300 ? 'text-emerald-600' : 'text-red-600'}`}>{client.status}</span> : <span className="text-slate-500">N/A</span>}</td>
                         <td className="px-4 py-3 text-right text-sm font-medium">
                           <div className="flex justify-end items-center gap-2">
-                            <button onClick={() => runTest(client.id)} disabled={runningClientId === client.id} className={`${buttonSecondaryClasses} disabled:opacity-50 disabled:cursor-wait`}>
+                            <button onClick={() => runTest(client.id)} disabled={runningClientId === client.id} className={`${SECONDARY_BUTTON_CLASSES} disabled:opacity-50 disabled:cursor-wait`}>
                                 {runningClientId === client.id ? <div className="w-4 h-4 border-2 border-t-emerald-500 border-slate-200 rounded-full animate-spin"></div> : <IconPlay/>}
                                 Run
                             </button>
-                            <button onClick={() => openEditModal(client)} className={iconButtonClasses} title="Edit Client"><IconPencil/></button>
-                            <button onClick={() => removeApiClient(client.id)} className={dangerIconButtonClasses} title="Delete Client"><IconTrash/></button>
+                            <button onClick={() => openEditModal(client)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_INFO_CLASSES}`} title="Edit Client"><IconPencil/></button>
+                            <button onClick={() => removeApiClient(client.id)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_DANGER_CLASSES}`} title="Delete Client"><IconTrash/></button>
                           </div>
                         </td>
                     </tr>

@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import type { LogEntry } from '../types';
-import { IconSearch, IconChevronDown, IconTrash } from '../constants';
+import { IconSearch, IconChevronDown, IconTrash, DEFAULT_INPUT_CLASSES, TEXT_DANGER_BUTTON_CLASSES, ICON_BUTTON_BASE_CLASSES, ICON_BUTTON_HOVER_SLATE_CLASSES } from '../constants';
 import EmptyState from './common/EmptyState'; // Use common EmptyState
-
-const inputClasses = "block w-full text-sm rounded-lg border-slate-300 bg-slate-50 shadow-sm focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-slate-200 disabled:cursor-not-allowed";
-const buttonDangerTextClasses = "inline-flex items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-800 transition-colors";
 
 const LogDetail: React.FC<{ log: LogEntry }> = ({ log }) => {
     const renderJson = (data: any) => {
@@ -52,9 +49,9 @@ const LogViewer: React.FC<LogViewerProps> = ({ logs, setLogs }) => {
             <div className="flex flex-col md:flex-row items-center gap-4 p-5 bg-white rounded-xl shadow-md border border-slate-200">
                 <div className="relative flex-grow w-full md:w-auto">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><IconSearch /></div>
-                    <input type="text" placeholder="Search by URL or method..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={`w-full pl-10 pr-4 py-2.5 ${inputClasses}`}/>
+                    <input type="text" placeholder="Search by URL or method..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={`w-full pl-10 pr-4 py-2.5 ${DEFAULT_INPUT_CLASSES}`}/>
                 </div>
-                <button onClick={() => setLogs([])} className={buttonDangerTextClasses}><IconTrash/> Clear Logs</button>
+                <button onClick={() => setLogs([])} className={TEXT_DANGER_BUTTON_CLASSES}><IconTrash/> Clear Logs</button>
             </div>
             
             {logs.length === 0 ? (
@@ -89,7 +86,7 @@ const LogViewer: React.FC<LogViewerProps> = ({ logs, setLogs }) => {
                                 return (
                                 <React.Fragment key={log.id}>
                                     <tr className="hover:bg-emerald-50/10 transition-colors">
-                                        <td className="px-4 py-3"><button onClick={() => setExpandedLogId(prev => prev === log.id ? null : log.id)} className={`text-slate-400 hover:text-slate-700 transform transition-transform ${expandedLogId === log.id ? 'rotate-180' : ''}`}><IconChevronDown/></button></td>
+                                        <td className="px-4 py-3"><button onClick={() => setExpandedLogId(prev => prev === log.id ? null : log.id)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_SLATE_CLASSES} transform ${expandedLogId === log.id ? 'rotate-180' : ''}`}><IconChevronDown/></button></td>
                                         <td className="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">{new Date(log.timestamp).toLocaleTimeString()}</td>
                                         <td className={`px-4 py-3 text-sm font-bold ${statusColor}`}>{status || 'ERR'}</td>
                                         <td className="px-4 py-3 text-sm font-mono text-slate-600">{log.request.method}</td>

@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import type { Category } from '../types';
-import { IconPlus, IconTrash, IconCategory } from '../constants';
+import { IconPlus, IconTrash, IconCategory, DEFAULT_INPUT_CLASSES, PRIMARY_BUTTON_CLASSES, TEXT_DANGER_BUTTON_CLASSES, ERROR_INPUT_CLASSES } from '../constants';
 import EmptyState from './common/EmptyState'; // Use common EmptyState
-
-const inputClasses = "block w-full text-sm rounded-lg border-slate-300 bg-slate-50 shadow-sm focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-slate-200 disabled:cursor-not-allowed";
-const buttonPrimaryClasses = "inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors";
-const buttonDangerClasses = "inline-flex items-center gap-1.5 rounded-lg border border-transparent text-red-600 px-3 py-1.5 text-sm font-semibold hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors";
 
 
 interface CategoryManagerProps {
@@ -61,13 +57,13 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ categories, setCatego
               onChange={(e) => { setNewCategory(e.target.value); setError(null); }}
               onKeyPress={(e) => e.key === 'Enter' && addCategory()}
               placeholder="e.g., E-commerce, Healthcare"
-              className={`${inputClasses} ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+              className={`${DEFAULT_INPUT_CLASSES} ${error ? ERROR_INPUT_CLASSES : ''}`}
               aria-invalid={error ? "true" : "false"}
               aria-describedby={error ? "category-error" : undefined}
             />
             {error && <p id="category-error" className="mt-2 text-sm text-red-600">{error}</p>}
           </div>
-          <button onClick={addCategory} className="self-end inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors">
+          <button onClick={addCategory} className={PRIMARY_BUTTON_CLASSES}>
             <IconPlus /> Add
           </button>
         </div>
@@ -78,7 +74,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ categories, setCatego
             title="No Categories Found" 
             message="Create categories to organize your data mappings." 
             icon={<IconCategory/>}
-            action={<button onClick={addCategory} className={buttonPrimaryClasses}><IconPlus /> Add Your First Category</button>}
+            action={<button onClick={addCategory} className={PRIMARY_BUTTON_CLASSES}><IconPlus /> Add Your First Category</button>}
           />
       ) : (
         <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden max-w-2xl">
@@ -94,7 +90,7 @@ const CategoryManager: React.FC<CategoryManagerProps> = ({ categories, setCatego
                 <tr key={category.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-base font-medium text-slate-800">{category.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button onClick={() => removeCategory(category.id, category.name)} className={buttonDangerClasses}>
+                    <button onClick={() => removeCategory(category.id, category.name)} className={TEXT_DANGER_BUTTON_CLASSES}>
                         <IconTrash /> Delete
                     </button>
                     </td>

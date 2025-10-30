@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import type { IncomingRoute, OutgoingRoute, Condition, ConditionGroup, ConditionOperator, IncomingAuthentication, ApiClientHeader } from '../types';
-import { INCOMING_METHODS, CONDITION_OPERATORS, IconPlus, IconTrash, IconPencil, INCOMING_AUTH_TYPES, API_KEY_LOCATIONS, IconSearch, IconIncoming } from '../constants';
+import { INCOMING_METHODS, CONDITION_OPERATORS, IconPlus, IconTrash, IconPencil, INCOMING_AUTH_TYPES, API_KEY_LOCATIONS, IconSearch, IconIncoming, DEFAULT_INPUT_CLASSES, PRIMARY_BUTTON_CLASSES, ICON_BUTTON_BASE_CLASSES, ICON_BUTTON_HOVER_INFO_CLASSES, ICON_BUTTON_HOVER_DANGER_CLASSES } from '../constants';
 import Modal from './common/Modal'; // Use common Modal
 import EmptyState from './common/EmptyState'; // Use common EmptyState
-
-const inputClasses = "block w-full text-sm rounded-lg border-slate-300 bg-slate-50 shadow-sm focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-slate-200 disabled:cursor-not-allowed";
-const buttonPrimaryClasses = "inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors";
-const iconButtonClasses = "text-slate-500 p-2 rounded-full hover:bg-slate-100 hover:text-blue-600 transition-colors";
-const dangerIconButtonClasses = "text-slate-500 p-2 rounded-full hover:bg-slate-100 hover:text-red-600 transition-colors";
 
 
 // --- Authentication UI ---
@@ -21,25 +16,25 @@ const IncomingAuthEditor: React.FC<{auth: IncomingAuthentication, setAuth: (a: I
     return (
         <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
             <h3 className="text-base font-semibold text-slate-700">Authentication</h3>
-            <select value={auth.type} onChange={e => handleTypeChange(e.target.value as any)} className={`${inputClasses} md:col-span-1`}>
+            <select value={auth.type} onChange={e => handleTypeChange(e.target.value as any)} className={`${DEFAULT_INPUT_CLASSES} md:col-span-1`}>
                 {INCOMING_AUTH_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
             </select>
             {auth.type === 'api-key' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <select value={auth.location} onChange={e => setAuth({...auth, location: e.target.value as any})} className={inputClasses}>
+                    <select value={auth.location} onChange={e => setAuth({...auth, location: e.target.value as any})} className={DEFAULT_INPUT_CLASSES}>
                         {API_KEY_LOCATIONS.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
                     </select>
-                    <input type="text" placeholder="Param Name (e.g., api_key)" value={auth.paramName} onChange={e => setAuth({...auth, paramName: e.target.value})} className={inputClasses}/>
+                    <input type="text" placeholder="Param Name (e.g., api_key)" value={auth.paramName} onChange={e => setAuth({...auth, paramName: e.target.value})} className={DEFAULT_INPUT_CLASSES}/>
                     <div className="md:col-span-2">
                         <label className="block text-xs font-medium text-slate-600 mb-1">Allowed Keys (one per line)</label>
-                        <textarea value={auth.allowedKeys.join('\n')} onChange={e => setAuth({...auth, allowedKeys: e.target.value.split('\n').map(k => k.trim()).filter(Boolean)})} rows={3} className={`${inputClasses} font-mono`}></textarea>
+                        <textarea value={auth.allowedKeys.join('\n')} onChange={e => setAuth({...auth, allowedKeys: e.target.value.split('\n').map(k => k.trim()).filter(Boolean)})} rows={3} className={`${DEFAULT_INPUT_CLASSES} font-mono`}></textarea>
                     </div>
                 </div>
             )}
             {auth.type === 'bearer' && (
                 <div className="md:col-span-2">
                     <label className="block text-xs font-medium text-slate-600 mb-1">Allowed Tokens (one per line)</label>
-                    <textarea value={auth.allowedTokens.join('\n')} onChange={e => setAuth({...auth, allowedTokens: e.target.value.split('\n').map(t => t.trim()).filter(Boolean)})} rows={3} className={`${inputClasses} font-mono`}></textarea>
+                    <textarea value={auth.allowedTokens.join('\n')} onChange={e => setAuth({...auth, allowedTokens: e.target.value.split('\n').map(t => t.trim()).filter(Boolean)})} rows={3} className={`${DEFAULT_INPUT_CLASSES} font-mono`}></textarea>
                 </div>
             )}
         </div>
@@ -51,12 +46,12 @@ const ConditionComponent: React.FC<{condition: Condition, onChange: (c: Conditio
     const showValueInput = condition.operator !== 'exists';
     return (
         <div className="flex items-center gap-2 p-3 bg-slate-100 rounded-lg border border-slate-200">
-            <input type="text" placeholder="body.user.id" value={condition.path} onChange={e => onChange({...condition, path: e.target.value})} className={`flex-grow font-mono ${inputClasses}`} />
-            <select value={condition.operator} onChange={e => onChange({...condition, operator: e.target.value as ConditionOperator})} className={inputClasses}>
+            <input type="text" placeholder="body.user.id" value={condition.path} onChange={e => onChange({...condition, path: e.target.value})} className={`flex-grow font-mono ${DEFAULT_INPUT_CLASSES}`} />
+            <select value={condition.operator} onChange={e => onChange({...condition, operator: e.target.value as ConditionOperator})} className={DEFAULT_INPUT_CLASSES}>
                 {CONDITION_OPERATORS.map(op => <option key={op.id} value={op.id}>{op.label}</option>)}
             </select>
-            {showValueInput && <input type="text" placeholder="Value" value={condition.value} onChange={e => onChange({...condition, value: e.target.value})} className={`flex-grow ${inputClasses}`} />}
-            <button onClick={onRemove} className={dangerIconButtonClasses} title="Remove Condition"><IconTrash/></button>
+            {showValueInput && <input type="text" placeholder="Value" value={condition.value} onChange={e => onChange({...condition, value: e.target.value})} className={`flex-grow ${DEFAULT_INPUT_CLASSES}`} />}
+            <button onClick={onRemove} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_DANGER_CLASSES}`} title="Remove Condition"><IconTrash/></button>
         </div>
     )
 }
@@ -89,13 +84,13 @@ const ConditionGroupComponent: React.FC<{group: ConditionGroup, onChange: (g: Co
             <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center gap-2">
                     <label className={`font-bold text-base ${group.type === 'AND' ? 'text-blue-600' : 'text-emerald-600'}`}>Match</label>
-                    <select value={group.type} onChange={e => onChange({...group, type: e.target.value as 'AND' | 'OR'})} className={`${inputClasses} font-bold w-auto py-1`}>
+                    <select value={group.type} onChange={e => onChange({...group, type: e.target.value as 'AND' | 'OR'})} className={`${DEFAULT_INPUT_CLASSES} font-bold w-auto py-1`}>
                         <option value="AND">ALL</option>
                         <option value="OR">ANY</option>
                     </select>
                     <label className="font-bold text-base text-slate-700">of the following:</label>
                 </div>
-                {!isRoot && <button onClick={onRemove} className="ml-auto text-slate-500 p-2 rounded-full hover:bg-slate-300 hover:text-red-600 transition-colors" title="Remove Group"><IconTrash/></button>}
+                {!isRoot && <button onClick={onRemove} className={`${ICON_BUTTON_BASE_CLASSES} hover:bg-slate-300 ${ICON_BUTTON_HOVER_DANGER_CLASSES}`} title="Remove Group"><IconTrash/></button>}
             </div>
             <div className="space-y-3 pl-4 border-l-2 border-slate-300">
                 {group.conditions.map((cond, i) => (
@@ -211,7 +206,7 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
         route.path.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const modalFooter = <button onClick={handleSave} className={buttonPrimaryClasses}>Save Route</button>;
+    const modalFooter = <button onClick={handleSave} className={PRIMARY_BUTTON_CLASSES}>Save Route</button>;
     
     return (
         <div className="space-y-8">
@@ -228,10 +223,10 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
                         placeholder="Search by name or path..." 
                         value={searchTerm} 
                         onChange={e => setSearchTerm(e.target.value)}
-                        className={`w-full pl-10 pr-4 py-2.5 ${inputClasses}`}
+                        className={`w-full pl-10 pr-4 py-2.5 ${DEFAULT_INPUT_CLASSES}`}
                     />
                 </div>
-                <button onClick={openAddModal} className={`${buttonPrimaryClasses} w-full md:w-auto`}>
+                <button onClick={openAddModal} className={`${PRIMARY_BUTTON_CLASSES} w-full md:w-auto`}>
                     <IconPlus /> Add Incoming Route
                 </button>
             </div>
@@ -240,10 +235,10 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={incomingRoutes.some(r => r.id === editingRoute.id) ? 'Edit Incoming Route' : 'Add Incoming Route'} footer={modalFooter}>
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label className="block text-sm font-medium text-slate-700 mb-1">Route Name <span className="text-red-500">*</span></label><input type="text" placeholder="e.g., Get User Profile" value={editingRoute.name} onChange={e => setEditingRoute({...editingRoute, name: e.target.value})} className={`mt-1 ${inputClasses}`}/></div>
-                            <div><label className="block text-sm font-medium text-slate-700 mb-1">Method</label><select value={editingRoute.method} onChange={e => setEditingRoute({...editingRoute, method: e.target.value as any})} className={`mt-1 ${inputClasses}`}>{INCOMING_METHODS.map(m => <option key={m} value={m}>{m}</option>)}</select></div>
+                            <div><label className="block text-sm font-medium text-slate-700 mb-1">Route Name <span className="text-red-500">*</span></label><input type="text" placeholder="e.g., Get User Profile" value={editingRoute.name} onChange={e => setEditingRoute({...editingRoute, name: e.target.value})} className={`mt-1 ${DEFAULT_INPUT_CLASSES}`}/></div>
+                            <div><label className="block text-sm font-medium text-slate-700 mb-1">Method</label><select value={editingRoute.method} onChange={e => setEditingRoute({...editingRoute, method: e.target.value as any})} className={`mt-1 ${DEFAULT_INPUT_CLASSES}`}>{INCOMING_METHODS.map(m => <option key={m} value={m}>{m}</option>)}</select></div>
                         </div>
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Path <span className="text-red-500">*</span></label><input type="text" placeholder="/users/:id" value={editingRoute.path} onChange={e => setEditingRoute({...editingRoute, path: e.target.value})} className={`mt-1 font-mono ${inputClasses}`}/></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Path <span className="text-red-500">*</span></label><input type="text" placeholder="/users/:id" value={editingRoute.path} onChange={e => setEditingRoute({...editingRoute, path: e.target.value})} className={`mt-1 font-mono ${DEFAULT_INPUT_CLASSES}`}/></div>
                         
                         <IncomingAuthEditor auth={editingRoute.authentication} setAuth={auth => setEditingRoute({...editingRoute, authentication: auth})} />
 
@@ -258,27 +253,27 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
                         </div>
 
                         {editingRoute.responseMode === 'proxy' && (
-                           <div><label className="block text-sm font-medium text-slate-700 mb-1">Route To</label><select value={editingRoute.outgoingRouteId ?? ""} onChange={e => setEditingRoute({...editingRoute, outgoingRouteId: e.target.value || null})} className={`mt-1 ${inputClasses}`}><option value="">-- Select Outgoing Route --</option>{outgoingRoutes.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}</select></div>
+                           <div><label className="block text-sm font-medium text-slate-700 mb-1">Route To</label><select value={editingRoute.outgoingRouteId ?? ""} onChange={e => setEditingRoute({...editingRoute, outgoingRouteId: e.target.value || null})} className={`mt-1 ${DEFAULT_INPUT_CLASSES}`}><option value="">-- Select Outgoing Route --</option>{outgoingRoutes.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}</select></div>
                         )}
 
                         {editingRoute.responseMode === 'mock' && (
                             <div className="space-y-4 p-5 rounded-xl bg-slate-50 border border-slate-200">
                                 <h3 className="text-base font-semibold text-slate-800">Mock Response Configuration</h3>
-                                <div><label className="block text-sm font-medium text-slate-700 mb-1">Status Code</label><input type="number" value={editingRoute.mockResponseStatusCode} onChange={e => setEditingRoute({...editingRoute, mockResponseStatusCode: parseInt(e.target.value, 10) || 200})} className={`mt-1 max-w-xs ${inputClasses}`}/></div>
+                                <div><label className="block text-sm font-medium text-slate-700 mb-1">Status Code</label><input type="number" value={editingRoute.mockResponseStatusCode} onChange={e => setEditingRoute({...editingRoute, mockResponseStatusCode: parseInt(e.target.value, 10) || 200})} className={`mt-1 max-w-xs ${DEFAULT_INPUT_CLASSES}`}/></div>
                                 
                                 <div className="space-y-2">
                                     <h4 className="text-sm font-medium text-slate-700">Headers</h4>
                                     {(editingRoute.mockResponseHeaders || []).map((header, index) => (
                                         <div key={header.id} className="flex items-center gap-2">
-                                            <input type="text" placeholder="Key" value={header.key} onChange={e => handleHeaderChange(index, 'key', e.target.value)} className={inputClasses} />
-                                            <input type="text" placeholder="Value" value={header.value} onChange={e => handleHeaderChange(index, 'value', e.target.value)} className={inputClasses} />
-                                            <button onClick={() => removeHeader(header.id)} className={dangerIconButtonClasses} title="Remove Header"><IconTrash /></button>
+                                            <input type="text" placeholder="Key" value={header.key} onChange={e => handleHeaderChange(index, 'key', e.target.value)} className={DEFAULT_INPUT_CLASSES} />
+                                            <input type="text" placeholder="Value" value={header.value} onChange={e => handleHeaderChange(index, 'value', e.target.value)} className={DEFAULT_INPUT_CLASSES} />
+                                            <button onClick={() => removeHeader(header.id)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_DANGER_CLASSES}`} title="Remove Header"><IconTrash /></button>
                                         </div>
                                     ))}
                                     <button onClick={addHeader} className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">+ Add Header</button>
                                 </div>
 
-                                <div><label className="block text-sm font-medium text-slate-700 mb-1">Response Body</label><textarea value={editingRoute.mockResponseBody} onChange={e => setEditingRoute({...editingRoute, mockResponseBody: e.target.value})} rows={8} className={`mt-1 font-mono ${inputClasses}`}></textarea></div>
+                                <div><label className="block text-sm font-medium text-slate-700 mb-1">Response Body</label><textarea value={editingRoute.mockResponseBody} onChange={e => setEditingRoute({...editingRoute, mockResponseBody: e.target.value})} rows={8} className={`mt-1 font-mono ${DEFAULT_INPUT_CLASSES}`}></textarea></div>
                             </div>
                         )}
                     </div>
@@ -290,7 +285,7 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
                     title="No Incoming Routes" 
                     message="Add a route to start intercepting requests." 
                     icon={<IconIncoming/>}
-                    action={<button onClick={openAddModal} className={buttonPrimaryClasses}><IconPlus /> Add Your First Incoming Route</button>}
+                    action={<button onClick={openAddModal} className={PRIMARY_BUTTON_CLASSES}><IconPlus /> Add Your First Incoming Route</button>}
                 />
             ) : (
                 <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
@@ -327,8 +322,8 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
                                     <td className="px-6 py-4 text-sm text-slate-600">{outgoingRoutes.find(r => r.id === route.outgoingRouteId)?.name || <span className="text-slate-400 italic">N/A</span>}</td>
                                     <td className="px-6 py-4 text-right text-sm font-medium">
                                         <div className="flex justify-end items-center gap-1">
-                                            <button onClick={() => openEditModal(route)} className={iconButtonClasses} title="Edit Route"><IconPencil/></button>
-                                            <button onClick={() => removeRoute(route.id)} className={dangerIconButtonClasses} title="Delete Route"><IconTrash/></button>
+                                            <button onClick={() => openEditModal(route)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_INFO_CLASSES}`} title="Edit Route"><IconPencil/></button>
+                                            <button onClick={() => removeRoute(route.id)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_DANGER_CLASSES}`} title="Delete Route"><IconTrash/></button>
                                         </div>
                                     </td>
                                 </tr>

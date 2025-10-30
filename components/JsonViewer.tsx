@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import type { Mapping } from '../types';
-import { IconJson } from '../constants';
+import { IconJson, DEFAULT_INPUT_CLASSES, PRIMARY_BUTTON_CLASSES } from '../constants';
 import EmptyState from './common/EmptyState'; // Use common EmptyState
-
-const inputClasses = "block w-full text-sm rounded-lg border-slate-300 bg-slate-50 shadow-sm focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-slate-200 disabled:cursor-not-allowed";
-const buttonPrimaryClasses = "inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors";
 
 
 interface JsonViewerProps {
@@ -47,7 +44,7 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ mappings, showToast }) => {
           <select
             onChange={(e) => setSelectedMappingId(e.target.value)}
             value={selectedMappingId ?? ""}
-            className={`flex-grow sm:max-w-xs ${inputClasses}`}
+            className={`flex-grow sm:max-w-xs ${DEFAULT_INPUT_CLASSES}`}
             aria-label="Select a mapping to view"
           >
             <option value="">-- Select a Mapping --</option>
@@ -60,7 +57,7 @@ const JsonViewer: React.FC<JsonViewerProps> = ({ mappings, showToast }) => {
           <button
             onClick={copyToClipboard}
             disabled={!selectedMapping}
-            className={`${buttonPrimaryClasses} ${!selectedMapping ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`${PRIMARY_BUTTON_CLASSES} ${!selectedMapping ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
             Copy JSON
           </button>

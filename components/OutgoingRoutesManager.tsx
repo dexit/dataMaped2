@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import type { OutgoingRoute, Mapping, EgressTransform, OutgoingAuthentication } from '../types';
-import { IconPlus, IconTrash, IconPencil, OUTGOING_AUTH_TYPES, API_KEY_LOCATIONS, IconOutgoing } from '../constants';
+import { IconPlus, IconTrash, IconPencil, OUTGOING_AUTH_TYPES, API_KEY_LOCATIONS, IconOutgoing, DEFAULT_INPUT_CLASSES, PRIMARY_BUTTON_CLASSES, ICON_BUTTON_BASE_CLASSES, ICON_BUTTON_HOVER_INFO_CLASSES, ICON_BUTTON_HOVER_DANGER_CLASSES } from '../constants';
 import Modal from './common/Modal'; // Use common Modal
 import EmptyState from './common/EmptyState'; // Use common EmptyState
-
-const inputClasses = "block w-full text-sm rounded-lg border-slate-300 bg-slate-50 shadow-sm focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-slate-200 disabled:cursor-not-allowed";
-const buttonPrimaryClasses = "inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors";
-const iconButtonClasses = "text-slate-500 p-2 rounded-full hover:bg-slate-100 hover:text-blue-600 transition-colors";
-const dangerIconButtonClasses = "text-slate-500 p-2 rounded-full hover:bg-slate-100 hover:text-red-600 transition-colors";
 
 
 // --- Egress Transforms UI ---
@@ -29,13 +24,13 @@ const EgressTransformEditor: React.FC<{transforms: EgressTransform[], setTransfo
             </div>
             {transforms.map((transform, i) => (
                 <div key={transform.id} className="flex items-center gap-2 p-3 bg-slate-100 rounded-lg border border-slate-200">
-                    <select value={transform.action} onChange={e => updateTransform(i, {...transform, action: e.target.value as any})} className={inputClasses}>
+                    <select value={transform.action} onChange={e => updateTransform(i, {...transform, action: e.target.value as any})} className={DEFAULT_INPUT_CLASSES}>
                         <option value="set">Set</option>
                         <option value="remove">Remove</option>
                     </select>
-                    <input type="text" placeholder="body.metadata.timestamp" value={transform.path} onChange={e => updateTransform(i, {...transform, path: e.target.value})} className={`flex-grow font-mono ${inputClasses}`} />
-                    {transform.action === 'set' && <input type="text" placeholder="Value" value={transform.value} onChange={e => updateTransform(i, {...transform, value: e.target.value})} className={`flex-grow ${inputClasses}`} />}
-                    <button onClick={() => removeTransform(transform.id)} className={dangerIconButtonClasses} title="Remove Transform"><IconTrash/></button>
+                    <input type="text" placeholder="body.metadata.timestamp" value={transform.path} onChange={e => updateTransform(i, {...transform, path: e.target.value})} className={`flex-grow font-mono ${DEFAULT_INPUT_CLASSES}`} />
+                    {transform.action === 'set' && <input type="text" placeholder="Value" value={transform.value} onChange={e => updateTransform(i, {...transform, value: e.target.value})} className={`flex-grow ${DEFAULT_INPUT_CLASSES}`} />}
+                    <button onClick={() => removeTransform(transform.id)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_DANGER_CLASSES}`} title="Remove Transform"><IconTrash/></button>
                 </div>
             ))}
             <button onClick={addTransform} className="text-base font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">+ Add Transform</button>
@@ -55,25 +50,25 @@ const OutgoingAuthEditor: React.FC<{auth: OutgoingAuthentication, setAuth: (a: O
     return (
         <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
             <h3 className="text-base font-semibold text-slate-700">Authentication</h3>
-            <select value={auth.type} onChange={e => handleTypeChange(e.target.value as any)} className={`${inputClasses}`}>
+            <select value={auth.type} onChange={e => handleTypeChange(e.target.value as any)} className={`${DEFAULT_INPUT_CLASSES}`}>
                 {OUTGOING_AUTH_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
             </select>
             {auth.type === 'api-key' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <select value={auth.location} onChange={e => setAuth({...auth, location: e.target.value as any})} className={inputClasses}>
+                    <select value={auth.location} onChange={e => setAuth({...auth, location: e.target.value as any})} className={DEFAULT_INPUT_CLASSES}>
                         {API_KEY_LOCATIONS.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
                     </select>
-                    <input type="text" placeholder="Param Name (e.g., api_key)" value={auth.paramName} onChange={e => setAuth({...auth, paramName: e.target.value})} className={inputClasses}/>
-                    <input type="password" placeholder="API Key Value" value={auth.apiKey} onChange={e => setAuth({...auth, apiKey: e.target.value})} className={`md:col-span-2 ${inputClasses}`}/>
+                    <input type="text" placeholder="Param Name (e.g., api_key)" value={auth.paramName} onChange={e => setAuth({...auth, paramName: e.target.value})} className={DEFAULT_INPUT_CLASSES}/>
+                    <input type="password" placeholder="API Key Value" value={auth.apiKey} onChange={e => setAuth({...auth, apiKey: e.target.value})} className={`md:col-span-2 ${DEFAULT_INPUT_CLASSES}`}/>
                 </div>
             )}
             {auth.type === 'bearer' && (
-                <input type="password" placeholder="Bearer Token" value={auth.token} onChange={e => setAuth({...auth, token: e.target.value})} className={inputClasses}/>
+                <input type="password" placeholder="Bearer Token" value={auth.token} onChange={e => setAuth({...auth, token: e.target.value})} className={DEFAULT_INPUT_CLASSES}/>
             )}
             {auth.type === 'basic' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input type="text" placeholder="Username" value={auth.username} onChange={e => setAuth({...auth, username: e.target.value})} className={inputClasses}/>
-                    <input type="password" placeholder="Password" value={auth.password} onChange={e => setAuth({...auth, password: e.target.value})} className={inputClasses}/>
+                    <input type="text" placeholder="Username" value={auth.username} onChange={e => setAuth({...auth, username: e.target.value})} className={DEFAULT_INPUT_CLASSES}/>
+                    <input type="password" placeholder="Password" value={auth.password} onChange={e => setAuth({...auth, password: e.target.value})} className={DEFAULT_INPUT_CLASSES}/>
                 </div>
             )}
         </div>
@@ -142,7 +137,7 @@ const OutgoingRoutesManager: React.FC<OutgoingRoutesManagerProps> = ({ outgoingR
         });
     };
 
-    const modalFooter = <button onClick={handleSave} className={buttonPrimaryClasses}>Save Route</button>;
+    const modalFooter = <button onClick={handleSave} className={PRIMARY_BUTTON_CLASSES}>Save Route</button>;
 
     return (
         <div className="space-y-8">
@@ -152,7 +147,7 @@ const OutgoingRoutesManager: React.FC<OutgoingRoutesManagerProps> = ({ outgoingR
             </header>
 
             <div className="flex justify-end"> {/* Added container for button alignment */}
-                <button onClick={openAddModal} className={buttonPrimaryClasses}>
+                <button onClick={openAddModal} className={PRIMARY_BUTTON_CLASSES}>
                     <IconPlus /> Add Outgoing Route
                 </button>
             </div>
@@ -160,12 +155,12 @@ const OutgoingRoutesManager: React.FC<OutgoingRoutesManagerProps> = ({ outgoingR
             {isModalOpen && editingRoute && (
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={outgoingRoutes.some(r => r.id === editingRoute.id) ? 'Edit Outgoing Route' : 'Add Outgoing Route'} footer={modalFooter}>
                     <div className="space-y-6">
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Route Name <span className="text-red-500">*</span></label><input type="text" placeholder="e.g., Forward to User Service" value={editingRoute.name} onChange={e => setEditingRoute({...editingRoute, name: e.target.value})} className={`mt-1 ${inputClasses}`}/></div>
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Target URL <span className="text-red-500">*</span></label><input type="text" placeholder="https://api.example.com/v1/users" value={editingRoute.targetUrl} onChange={e => setEditingRoute({...editingRoute, targetUrl: e.target.value})} className={`mt-1 font-mono ${inputClasses}`}/></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Route Name <span className="text-red-500">*</span></label><input type="text" placeholder="e.g., Forward to User Service" value={editingRoute.name} onChange={e => setEditingRoute({...editingRoute, name: e.target.value})} className={`mt-1 ${DEFAULT_INPUT_CLASSES}`}/></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Target URL <span className="text-red-500">*</span></label><input type="text" placeholder="https://api.example.com/v1/users" value={editingRoute.targetUrl} onChange={e => setEditingRoute({...editingRoute, targetUrl: e.target.value})} className={`mt-1 font-mono ${DEFAULT_INPUT_CLASSES}`}/></div>
                         
                         <OutgoingAuthEditor auth={editingRoute.authentication} setAuth={auth => setEditingRoute({...editingRoute, authentication: auth})} />
 
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Apply Mapping (optional)</label><select value={editingRoute.mappingId ?? ""} onChange={e => setEditingRoute({...editingRoute, mappingId: e.target.value || null})} className={`mt-1 ${inputClasses}`}><option value="">-- No Mapping --</option>{mappings.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select></div>
+                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Apply Mapping (optional)</label><select value={editingRoute.mappingId ?? ""} onChange={e => setEditingRoute({...editingRoute, mappingId: e.target.value || null})} className={`mt-1 ${DEFAULT_INPUT_CLASSES}`}><option value="">-- No Mapping --</option>{mappings.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select></div>
                         <EgressTransformEditor transforms={editingRoute.egressTransforms} setTransforms={t => setEditingRoute({...editingRoute, egressTransforms: t})} />
                     </div>
                 </Modal>
@@ -176,7 +171,7 @@ const OutgoingRoutesManager: React.FC<OutgoingRoutesManagerProps> = ({ outgoingR
                     title="No Outgoing Routes" 
                     message="Add a route to define where to send processed requests." 
                     icon={<IconOutgoing/>}
-                    action={<button onClick={openAddModal} className={buttonPrimaryClasses}><IconPlus /> Add Your First Outgoing Route</button>}
+                    action={<button onClick={openAddModal} className={PRIMARY_BUTTON_CLASSES}><IconPlus /> Add Your First Outgoing Route</button>}
                 />
             ) : (
                 <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
@@ -190,8 +185,8 @@ const OutgoingRoutesManager: React.FC<OutgoingRoutesManagerProps> = ({ outgoingR
                                     <td className="px-6 py-4 text-sm text-slate-600">{mappings.find(m => m.id === route.mappingId)?.name || <span className="text-slate-400 italic">None</span>}</td>
                                     <td className="px-6 py-4 text-right text-sm font-medium">
                                         <div className="flex justify-end items-center gap-1">
-                                            <button onClick={() => openEditModal(route)} className={iconButtonClasses} title="Edit Route"><IconPencil/></button>
-                                            <button onClick={() => removeRoute(route.id)} className={dangerIconButtonClasses} title="Delete Route"><IconTrash/></button>
+                                            <button onClick={() => openEditModal(route)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_INFO_CLASSES}`} title="Edit Route"><IconPencil/></button>
+                                            <button onClick={() => removeRoute(route.id)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_DANGER_CLASSES}`} title="Delete Route"><IconTrash/></button>
                                         </div>
                                     </td>
                                 </tr>

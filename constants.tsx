@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 
 export const DATA_TYPES = [
@@ -30,6 +31,29 @@ export const OUTGOING_AUTH_TYPES: Array<{id: 'none' | 'api-key' | 'bearer' | 'ba
     {id: 'bearer', label: 'Bearer Token'},
     {id: 'basic', label: 'Basic Auth'}
 ];
+
+// --- UI CONSTANTS ---
+
+// Input Field Styles
+export const BASE_INPUT_CLASSES = "block w-full text-sm rounded-lg border-slate-300 bg-slate-50 shadow-sm transition-all duration-200 ease-in-out placeholder-slate-400";
+export const FOCUS_INPUT_CLASSES = "focus:bg-white focus:border-emerald-500 focus:ring-emerald-500";
+export const DISABLED_INPUT_CLASSES = "disabled:bg-slate-100 disabled:cursor-not-allowed";
+export const ERROR_INPUT_CLASSES = "border-red-500 focus:border-red-500 focus:ring-red-500";
+export const DEFAULT_INPUT_CLASSES = `${BASE_INPUT_CLASSES} ${FOCUS_INPUT_CLASSES} ${DISABLED_INPUT_CLASSES}`;
+
+// Button Styles
+export const PRIMARY_BUTTON_CLASSES = "inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200";
+export const SECONDARY_BUTTON_CLASSES = "inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200";
+export const DANGER_BUTTON_CLASSES = "inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200";
+export const TEXT_DANGER_BUTTON_CLASSES = "inline-flex items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-800 transition-colors duration-200";
+
+// Icon Button Styles
+export const ICON_BUTTON_BASE_CLASSES = "text-slate-500 p-2 rounded-full hover:bg-slate-100 transition-colors duration-200";
+export const ICON_BUTTON_HOVER_PRIMARY_CLASSES = "hover:text-emerald-600";
+export const ICON_BUTTON_HOVER_INFO_CLASSES = "hover:text-blue-600";
+export const ICON_BUTTON_HOVER_DANGER_CLASSES = "hover:text-red-600";
+export const ICON_BUTTON_HOVER_PURPLE_CLASSES = "hover:text-purple-600";
+export const ICON_BUTTON_HOVER_SLATE_CLASSES = "hover:text-slate-700";
 
 
 // --- ICONS ---

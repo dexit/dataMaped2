@@ -1,16 +1,10 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import type { Mapping, DatamapEntry, Category } from '../types';
-import { DATA_TYPES } from '../constants';
+import { DATA_TYPES, DEFAULT_INPUT_CLASSES, PRIMARY_BUTTON_CLASSES, SECONDARY_BUTTON_CLASSES, TEXT_DANGER_BUTTON_CLASSES, ICON_BUTTON_BASE_CLASSES, ICON_BUTTON_HOVER_INFO_CLASSES, ICON_BUTTON_HOVER_DANGER_CLASSES, ICON_BUTTON_HOVER_PURPLE_CLASSES, ICON_BUTTON_HOVER_SLATE_CLASSES } from '../constants';
 import { IconChevronDown, IconPlus, IconTrash, IconWand, IconPencil, IconSearch, IconSave, IconEdit, IconMappings } from '../constants';
 import { suggestMappings } from '../services/geminiService';
 import Modal from './common/Modal'; // Use common Modal
 import EmptyState from './common/EmptyState'; // Use common EmptyState
-
-const inputClasses = "block w-full text-sm rounded-lg border-slate-300 bg-slate-50 shadow-sm focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 disabled:bg-slate-200 disabled:cursor-not-allowed";
-const buttonPrimaryClasses = "inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors";
-const buttonSecondaryClasses = "inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors";
-const iconButtonClasses = "text-slate-500 p-2 rounded-full hover:bg-slate-100 hover:text-emerald-600 transition-colors";
-
 
 // Main Component Logic starts here
 
@@ -32,12 +26,12 @@ const GeminiSuggestModal: React.FC<{ isOpen: boolean; onClose: () => void; onApp
     };
     
     const footer = (
-        <button onClick={handleSuggest} disabled={isLoading} className={`${buttonPrimaryClasses} ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}>
+        <button onClick={handleSuggest} disabled={isLoading} className={`${PRIMARY_BUTTON_CLASSES} ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}>
             <IconWand /> {isLoading ? 'Thinking...' : 'Suggest Mappings'}
         </button>
     );
 
-    return ( <Modal isOpen={isOpen} onClose={onClose} title="Get AI-Powered Mapping Suggestions" size="xl" footer={footer}><div className="space-y-4"><p className="text-base text-slate-600">Paste example JSON objects for your source and target data. The AI will analyze the keys and suggest mappings. Provide valid JSON.</p><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><textarea value={sourceSchema} onChange={e => setSourceSchema(e.target.value)} placeholder={`{\n  "user_id": 123,\n  "email_address": "test@example.com"\n}`} rows={10} className={`${inputClasses} font-mono`}></textarea><textarea value={targetSchema} onChange={e => setTargetSchema(e.target.value)} placeholder={`{\n  "userId": 123,\n  "email": "test@example.com"\n}`} rows={10} className={`${inputClasses} font-mono`}></textarea></div></div></Modal> );
+    return ( <Modal isOpen={isOpen} onClose={onClose} title="Get AI-Powered Mapping Suggestions" size="xl" footer={footer}><div className="space-y-4"><p className="text-base text-slate-600">Paste example JSON objects for your source and target data. The AI will analyze the keys and suggest mappings. Provide valid JSON.</p><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><textarea value={sourceSchema} onChange={e => setSourceSchema(e.target.value)} placeholder={`{\n  "user_id": 123,\n  "email_address": "test@example.com"\n}`} rows={10} className={`${DEFAULT_INPUT_CLASSES} font-mono`}></textarea><textarea value={targetSchema} onChange={e => setTargetSchema(e.target.value)} placeholder={`{\n  "userId": 123,\n  "email": "test@example.com"\n}`} rows={10} className={`${DEFAULT_INPUT_CLASSES} font-mono`}></textarea></div></div></Modal> );
 };
 
 const CsvImportModal: React.FC<{ isOpen: boolean; onClose: () => void; onConfirm: (config: {name: string, category: string, datamap: DatamapEntry[]}) => void; csvData: { headers: string[], rows: string[][] } | null; categories: Category[]; showToast: (message: string, type: 'success' | 'error') => void; initialName: string; }> = ({ isOpen, onClose, onConfirm, csvData, categories, showToast, initialName }) => {
@@ -70,17 +64,17 @@ const CsvImportModal: React.FC<{ isOpen: boolean; onClose: () => void; onConfirm
         onConfirm({ name: mappingName, category, datamap });
         onClose();
     };
-    const renderSelect = (field: keyof ColumnMap) => <select value={columnMap[field]} onChange={e => setColumnMap(prev => ({...prev, [field]: e.target.value}))} className={inputClasses}><option value="">-- Not Mapped --</option>{csvData.headers.map(h => <option key={h} value={h}>{h}</option>)}</select>;
-    const footer = <><button onClick={onClose} className={buttonSecondaryClasses}>Cancel</button><button onClick={handleConfirm} className={buttonPrimaryClasses}>Import Mapping</button></>;
-    return ( <Modal isOpen={isOpen} onClose={onClose} title="Import from CSV" size="xl" footer={footer}><div className="space-y-6"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label className="block text-sm font-medium text-slate-700">Mapping Name <span className="text-red-500">*</span></label><input type="text" value={mappingName} onChange={e => setMappingName(e.target.value)} className={`mt-1 ${inputClasses}`} /></div><div><label className="block text-sm font-medium text-slate-700">Category</label><select value={category} onChange={e => setCategory(e.target.value)} className={`mt-1 ${inputClasses}`}><option value="">None</option>{categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div></div><div><h3 className="text-lg font-bold text-slate-800">Map CSV Columns</h3><p className="text-sm text-slate-600 mt-1 mb-3">Select which CSV columns correspond to the mapping fields.</p><div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2"><div><label className="block text-sm font-medium text-slate-700">Source Field <span className="text-red-500">*</span></label>{renderSelect('sourceField')}</div><div><label className="block text-sm font-medium text-slate-700">Source Type</label>{renderSelect('sourceType')}</div><div><label className="block text-sm font-medium text-slate-700">Target Field <span className="text-red-500">*</span></label>{renderSelect('targetField')}</div><div><label className="block text-sm font-medium text-slate-700">Target Type</label>{renderSelect('targetType')}</div></div></div><div><h3 className="text-lg font-bold text-slate-800">Data Preview (first 5 rows)</h3><div className="overflow-x-auto mt-2 border border-slate-200 rounded-lg"><table className="min-w-full text-sm"><thead className="bg-slate-100"><tr className="text-left">{csvData.headers.map(h => <th key={h} className="p-3 font-semibold text-slate-600">{h}</th>)}</tr></thead><tbody className="bg-white divide-y divide-slate-200">{csvData.rows.slice(0, 5).map((row, i) => <tr key={i} className="hover:bg-slate-50">{row.map((cell, j) => <td key={j} className="p-3 truncate text-slate-700">{cell}</td>)}</tr>)}</tbody></table></div></div></div></Modal> )
+    const renderSelect = (field: keyof ColumnMap) => <select value={columnMap[field]} onChange={e => setColumnMap(prev => ({...prev, [field]: e.target.value}))} className={DEFAULT_INPUT_CLASSES}><option value="">-- Not Mapped --</option>{csvData.headers.map(h => <option key={h} value={h}>{h}</option>)}</select>;
+    const footer = <><button onClick={onClose} className={SECONDARY_BUTTON_CLASSES}>Cancel</button><button onClick={handleConfirm} className={PRIMARY_BUTTON_CLASSES}>Import Mapping</button></>;
+    return ( <Modal isOpen={isOpen} onClose={onClose} title="Import from CSV" size="xl" footer={footer}><div className="space-y-6"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label className="block text-sm font-medium text-slate-700">Mapping Name <span className="text-red-500">*</span></label><input type="text" value={mappingName} onChange={e => setMappingName(e.target.value)} className={`mt-1 ${DEFAULT_INPUT_CLASSES}`} /></div><div><label className="block text-sm font-medium text-slate-700">Category</label><select value={category} onChange={e => setCategory(e.target.value)} className={`mt-1 ${DEFAULT_INPUT_CLASSES}`}><option value="">None</option>{categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div></div><div><h3 className="text-lg font-bold text-slate-800">Map CSV Columns</h3><p className="text-sm text-slate-600 mt-1 mb-3">Select which CSV columns correspond to the mapping fields.</p><div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2"><div><label className="block text-sm font-medium text-slate-700">Source Field <span className="text-red-500">*</span></label>{renderSelect('sourceField')}</div><div><label className="block text-sm font-medium text-slate-700">Source Type</label>{renderSelect('sourceType')}</div><div><label className="block text-sm font-medium text-slate-700">Target Field <span className="text-red-500">*</span></label>{renderSelect('targetField')}</div><div><label className="block text-sm font-medium text-slate-700">Target Type</label>{renderSelect('targetType')}</div></div></div><div><h3 className="text-lg font-bold text-slate-800">Data Preview (first 5 rows)</h3><div className="overflow-x-auto mt-2 border border-slate-200 rounded-lg"><table className="min-w-full text-sm"><thead className="bg-slate-100"><tr className="text-left">{csvData.headers.map(h => <th key={h} className="p-3 font-semibold text-slate-600"> {h}</th>)}</tr></thead><tbody className="bg-white divide-y divide-slate-200">{csvData.rows.slice(0, 5).map((row, i) => <tr key={i} className="hover:bg-slate-50">{row.map((cell, j) => <td key={j} className="p-3 truncate text-slate-700">{cell}</td>)}</tr>)}</tbody></table></div></div></div></Modal> )
 };
 
 const MappingFormModal: React.FC<{ isOpen: boolean; onClose: () => void; onSave: (data: {name: string, category: string}) => void; mapping: Pick<Mapping, 'name' | 'category'> | null; categories: Category[]; showToast: (message: string, type: 'success' | 'error') => void; }> = ({isOpen, onClose, onSave, mapping, categories, showToast}) => {
     const [formData, setFormData] = useState({name: '', category: ''});
     useEffect(() => { setFormData(mapping ? {name: mapping.name, category: mapping.category} : {name: '', category: ''}); }, [mapping, isOpen]);
     const handleSave = () => { if(!formData.name.trim()){ showToast("Mapping Name is required.", "error"); return; } onSave(formData); }
-    const footer = <button onClick={handleSave} className={buttonPrimaryClasses}>Save Mapping</button>;
-    return ( <Modal isOpen={isOpen} onClose={onClose} title={mapping ? "Edit Mapping" : "Add New Mapping"} size="md" footer={footer}><div className="space-y-5"><div><label className="block text-sm font-medium text-slate-700">Mapping Name <span className="text-red-500">*</span></label><input type="text" placeholder="e.g., User Profile V2" value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} className={`mt-1 ${inputClasses}`}/></div><div><label className="block text-sm font-medium text-slate-700">Category (optional)</label><select value={formData.category} onChange={e => setFormData(p => ({ ...p, category: e.target.value }))} className={`mt-1 ${inputClasses}`}><option value="">None</option>{categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div></div></Modal> );
+    const footer = <button onClick={handleSave} className={PRIMARY_BUTTON_CLASSES}>Save Mapping</button>;
+    return ( <Modal isOpen={isOpen} onClose={onClose} title={mapping ? "Edit Mapping" : "Add New Mapping"} size="md" footer={footer}><div className="space-y-5"><div><label className="block text-sm font-medium text-slate-700">Mapping Name <span className="text-red-500">*</span></label><input type="text" placeholder="e.g., User Profile V2" value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} className={`mt-1 ${DEFAULT_INPUT_CLASSES}`}/></div><div><label className="block text-sm font-medium text-slate-700">Category (optional)</label><select value={formData.category} onChange={e => setFormData(p => ({ ...p, category: e.target.value }))} className={`mt-1 ${DEFAULT_INPUT_CLASSES}`}><option value="">None</option>{categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div></div></Modal> );
 };
 
 interface MappingManagerProps {
@@ -158,11 +152,11 @@ const MappingManager: React.FC<MappingManagerProps> = ({ mappings, setMappings, 
 
   const renderAddEntryRow = (mappingId: string) => (
     <tr className="bg-slate-50">
-        <td className="p-3"><input type="text" placeholder="Source Field" value={newDatamapEntry.sourceField} onChange={e => setNewDatamapEntry({...newDatamapEntry, sourceField: e.target.value})} className={inputClasses} /></td>
-        <td className="p-3"><select value={newDatamapEntry.sourceType} onChange={e => setNewDatamapEntry({...newDatamapEntry, sourceType: e.target.value})} className={inputClasses}>{DATA_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select></td>
-        <td className="p-3"><input type="text" placeholder="Target Field" value={newDatamapEntry.targetField} onChange={e => setNewDatamapEntry({...newDatamapEntry, targetField: e.target.value})} className={inputClasses} /></td>
-        <td className="p-3"><select value={newDatamapEntry.targetType} onChange={e => setNewDatamapEntry({...newDatamapEntry, targetType: e.target.value})} className={inputClasses}>{DATA_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select></td>
-        <td className="p-3 text-right"><button onClick={() => addDatamapEntry(mappingId)} className="bg-emerald-500 hover:bg-emerald-600 text-white p-2 rounded-lg shadow-sm transition-colors"><IconPlus/></button></td>
+        <td className="p-3"><input type="text" placeholder="Source Field" value={newDatamapEntry.sourceField} onChange={e => setNewDatamapEntry({...newDatamapEntry, sourceField: e.target.value})} className={DEFAULT_INPUT_CLASSES} /></td>
+        <td className="p-3"><select value={newDatamapEntry.sourceType} onChange={e => setNewDatamapEntry({...newDatamapEntry, sourceType: e.target.value})} className={DEFAULT_INPUT_CLASSES}>{DATA_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select></td>
+        <td className="p-3"><input type="text" placeholder="Target Field" value={newDatamapEntry.targetField} onChange={e => setNewDatamapEntry({...newDatamapEntry, targetField: e.target.value})} className={DEFAULT_INPUT_CLASSES} /></td>
+        <td className="p-3"><select value={newDatamapEntry.targetType} onChange={e => setNewDatamapEntry({...newDatamapEntry, targetType: e.target.value})} className={DEFAULT_INPUT_CLASSES}>{DATA_TYPES.map(t => <option key={t} value={t}>{t}</option>)}</select></td>
+        <td className="p-3 text-right"><button onClick={() => addDatamapEntry(mappingId)} className={`bg-emerald-500 hover:bg-emerald-600 text-white p-2 rounded-lg shadow-sm transition-colors`}><IconPlus/></button></td>
     </tr>
   );
 
@@ -171,14 +165,15 @@ const MappingManager: React.FC<MappingManagerProps> = ({ mappings, setMappings, 
     if (isEditing && editingEntryData) {
         return (
             <tr key={entry.id} className="bg-emerald-50">
-                <td className="p-3"><input type="text" value={editingEntryData.sourceField} onChange={e => setEditingEntryData({...editingEntryData, sourceField: e.target.value})} className={`${inputClasses} border-emerald-300`} /></td>
-                <td className="p-3"><select value={editingEntryData.sourceType} onChange={e => setEditingEntryData({...editingEntryData, sourceType: e.target.value})} className={`${inputClasses} border-emerald-300`}>{DATA_TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select></td>
-                <td className="p-3"><input type="text" value={editingEntryData.targetField} onChange={e => setEditingEntryData({...editingEntryData, targetField: e.target.value})} className={`${inputClasses} border-emerald-300`} /></td>
-                <td className="p-3"><select value={editingEntryData.targetType} onChange={e => setEditingEntryData({...editingEntryData, targetType: e.target.value})} className={`${inputClasses} border-emerald-300`}>{DATA_TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select></td>
+                <td className="p-3"><input type="text" value={editingEntryData.sourceField} onChange={e => setEditingEntryData({...editingEntryData, sourceField: e.target.value})} className={`${DEFAULT_INPUT_CLASSES} border-emerald-300`} /></td>
+                <td className="p-3"><select value={editingEntryData.sourceType} onChange={e => setEditingEntryData({...editingEntryData, sourceType: e.target.value})} className={`${DEFAULT_INPUT_CLASSES} border-emerald-300`}>{DATA_TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select></td>
+                <td className="p-3"><input type="text" value={editingEntryData.targetField} onChange={e => setEditingEntryData({...editingEntryData, targetField: e.target.value})} className={`${DEFAULT_INPUT_CLASSES} border-emerald-300`} /></td>
+                <td className="p-3"><select value={editingEntryData.targetType} onChange={e => setEditingEntryData({...editingEntryData, targetType: e.target.value})} className={`${DEFAULT_INPUT_CLASSES} border-emerald-300`}>{DATA_TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select></td>
                 <td className="p-3 text-right">
                     <div className="flex justify-end gap-2">
-                        <button onClick={() => saveEditingEntry(mapping.id)} className="text-emerald-600 p-2 rounded-full hover:bg-emerald-100 transition-colors" title="Save"><IconSave/></button>
-                        <button onClick={cancelEditingEntry} className="text-slate-500 p-2 rounded-full hover:bg-slate-200 text-xl" title="Cancel">&times;</button>
+                        {/* Fix: Replaced ICON_BUTTON_HOVER_PRIMARY_CLASSES with ICON_BUTTON_HOVER_INFO_CLASSES */}
+                        <button onClick={() => saveEditingEntry(mapping.id)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_INFO_CLASSES}`} title="Save"><IconSave/></button>
+                        <button onClick={cancelEditingEntry} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_SLATE_CLASSES} text-xl`} title="Cancel">&times;</button>
                     </div>
                 </td>
             </tr>
@@ -192,8 +187,8 @@ const MappingManager: React.FC<MappingManagerProps> = ({ mappings, setMappings, 
         <td className="py-3 px-4 text-sm text-slate-500">{entry.targetType}</td>
         <td className="py-3 px-4 text-right">
             <div className="flex justify-end items-center gap-1">
-                <button onClick={() => startEditingEntry(entry)} className={`${iconButtonClasses} hover:text-blue-600`} title="Edit Entry"><IconEdit/></button>
-                <button onClick={() => removeDatamapEntry(mapping.id, entry.id)} className={`${iconButtonClasses} hover:text-red-600`} title="Delete Entry"><IconTrash/></button>
+                <button onClick={() => startEditingEntry(entry)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_INFO_CLASSES}`} title="Edit Entry"><IconEdit/></button>
+                <button onClick={() => removeDatamapEntry(mapping.id, entry.id)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_DANGER_CLASSES}`} title="Delete Entry"><IconTrash/></button>
             </div>
         </td>
       </tr>
@@ -211,15 +206,15 @@ const MappingManager: React.FC<MappingManagerProps> = ({ mappings, setMappings, 
       <div className="flex flex-col md:flex-row items-center gap-4 p-5 bg-white rounded-xl shadow-md border border-slate-200">
         <div className="relative flex-grow w-full md:w-auto">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><IconSearch /></div>
-            <input type="text" placeholder="Search mappings by name or category..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={`w-full pl-10 pr-4 py-2.5 ${inputClasses}`}/>
+            <input type="text" placeholder="Search mappings by name or category..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={`w-full pl-10 pr-4 py-2.5 ${DEFAULT_INPUT_CLASSES}`}/>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
-            <label className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 cursor-pointer transition-colors">
+            <label className={`flex-1 md:flex-none ${SECONDARY_BUTTON_CLASSES} cursor-pointer`}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
               Import CSV
               <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".csv" className="hidden" />
             </label>
-            <button onClick={openAddModal} className={`${buttonPrimaryClasses} flex-1 md:flex-none`}><IconPlus /> Add Mapping</button>
+            <button onClick={openAddModal} className={`${PRIMARY_BUTTON_CLASSES} flex-1 md:flex-none`}><IconPlus /> Add Mapping</button>
         </div>
       </div>
       
@@ -228,7 +223,7 @@ const MappingManager: React.FC<MappingManagerProps> = ({ mappings, setMappings, 
             title="No Mappings Yet" 
             message="Get started by adding a new mapping or importing one from a CSV file." 
             icon={<IconMappings/>}
-            action={<button onClick={openAddModal} className={buttonPrimaryClasses}><IconPlus /> Add Your First Mapping</button>}/>
+            action={<button onClick={openAddModal} className={PRIMARY_BUTTON_CLASSES}><IconPlus /> Add Your First Mapping</button>}/>
       ) : (
       <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
@@ -254,16 +249,17 @@ const MappingManager: React.FC<MappingManagerProps> = ({ mappings, setMappings, 
             {filteredMappings.map(mapping => (
               <React.Fragment key={mapping.id}>
                 <tr className="hover:bg-emerald-50/10 transition-colors">
-                  <td className="px-4 py-2 text-center"><button onClick={() => setExpandedMappingId(p => p === mapping.id ? null : mapping.id)} className={`text-slate-400 hover:text-slate-700 transform transition-transform duration-200 ${expandedMappingId === mapping.id ? 'rotate-180' : ''}`}><IconChevronDown /></button></td>
+                  {/* Fix: ICON_BUTTON_HOVER_SLATE_CLASSES should be correctly imported after this fix */}
+                  <td className="px-4 py-2 text-center"><button onClick={() => setExpandedMappingId(p => p === mapping.id ? null : mapping.id)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_SLATE_CLASSES} transform ${expandedMappingId === mapping.id ? 'rotate-180' : ''}`}><IconChevronDown /></button></td>
                   <td className="px-4 py-3 text-base font-medium text-slate-800">{mapping.name}</td>
                   <td className="px-4 py-3 text-sm text-slate-600">{mapping.category || <span className="text-slate-400 italic">N/A</span>}</td>
                   <td className="px-4 py-3 text-sm text-slate-600">{mapping.datamap.length}</td>
                   <td className="px-4 py-3 text-sm text-slate-600">{new Date(mapping.lastModified).toLocaleString()}</td>
                   <td className="px-4 py-3 text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => { setActiveMappingForAi(mapping.id); setAiModalOpen(true);}} className={`${iconButtonClasses} hover:text-purple-600`} title="AI Suggestions"><IconWand/></button>
-                      <button onClick={() => openEditModal(mapping)} className={`${iconButtonClasses} hover:text-blue-600`} title="Edit Mapping"><IconPencil/></button>
-                      <button onClick={() => removeMapping(mapping.id)} className={`${iconButtonClasses} hover:text-red-600`} title="Delete Mapping"><IconTrash/></button>
+                      <button onClick={() => { setActiveMappingForAi(mapping.id); setAiModalOpen(true);}} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_PURPLE_CLASSES}`} title="AI Suggestions"><IconWand/></button>
+                      <button onClick={() => openEditModal(mapping)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_INFO_CLASSES}`} title="Edit Mapping"><IconPencil/></button>
+                      <button onClick={() => removeMapping(mapping.id)} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_DANGER_CLASSES}`} title="Delete Mapping"><IconTrash/></button>
                     </div>
                   </td>
                 </tr>

@@ -11,41 +11,8 @@ import CategoryManager from './components/CategoryManager';
 import JsonViewer from './components/JsonViewer';
 import ApiClientComponent from './components/ApiClient';
 import LogViewer from './components/LogViewer';
-import EmptyState from './components/common/EmptyState'; // Assuming this will be created
-
-const ConfirmationModal: React.FC<{
-  config: ConfirmationState;
-  onClose: () => void;
-  onConfirm: () => void;
-}> = ({ config, onClose, onConfirm }) => {
-  if (!config.isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center p-4 animate-fade-in-down"
-         onClick={onClose}
-         aria-modal="true"
-         role="dialog"
-         aria-labelledby="confirmation-modal-title">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md m-4 transform transition-all" onClick={e => e.stopPropagation()}>
-        <div className="p-6 sm:p-8">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-50 text-red-600">
-                <IconAlertTriangle />
-            </div>
-            <div className="mt-0 text-left flex-grow">
-              <h3 id="confirmation-modal-title" className="text-xl leading-6 font-bold text-slate-900">{config.title}</h3>
-              <p className="mt-2 text-base text-slate-600">{config.message}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-slate-50 px-6 py-4 flex flex-row-reverse gap-3 rounded-b-xl border-t border-slate-200">
-          <button onClick={onConfirm} className="inline-flex justify-center rounded-lg border border-transparent bg-red-600 px-5 py-2.5 text-base font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">Confirm</button>
-          <button onClick={onClose} className="inline-flex justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-base font-semibold text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors">Cancel</button>
-        </div>
-      </div>
-    </div>
-  );
-};
+import EmptyState from './components/common/EmptyState';
+import ConfirmationModal from './components/common/ConfirmationModal'; // Import the new common modal
 
 
 const App: React.FC = () => {
@@ -149,7 +116,7 @@ const App: React.FC = () => {
     <div className="flex h-screen text-slate-800">
       <ConfirmationModal config={confirmation} onClose={() => setConfirmation(prev => ({...prev, isOpen: false}))} onConfirm={confirmation.onConfirm} />
       {toast && (
-        <div className={`fixed bottom-5 right-5 z-50 px-6 py-3 rounded-lg shadow-xl text-white font-semibold text-base animate-fade-in-down ${toast.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`}>
+        <div className={`fixed bottom-5 right-5 z-50 px-6 py-3 rounded-xl shadow-lg border border-slate-200 text-white font-semibold text-base animate-fade-in-down ${toast.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`}>
           {toast.message}
         </div>
       )}
