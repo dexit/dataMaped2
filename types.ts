@@ -114,6 +114,9 @@ export interface IncomingRoute {
   mockResponseStatusCode?: number;
   mockResponseHeaders?: ApiClientHeader[];
   mockResponseBody?: string;
+  
+  // Custom expected JSON Payload
+  samplePayload?: string;
 }
 
 export interface EgressTransform {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { ApiClient, Mapping, ApiClientHeader } from '../types';
+import type { ApiClient, Mapping, ApiClientHeader, IncomingRoute } from '../types';
 import { API_METHODS, AUTH_TYPES, DEFAULT_INPUT_CLASSES, PRIMARY_BUTTON_CLASSES, SECONDARY_BUTTON_CLASSES, ICON_BUTTON_BASE_CLASSES, ICON_BUTTON_HOVER_INFO_CLASSES, ICON_BUTTON_HOVER_DANGER_CLASSES, ICON_BUTTON_HOVER_SLATE_CLASSES } from '../constants';
 import { IconPlay, IconPlus, IconTrash, IconChevronDown, IconSearch, IconPencil, IconApiClient } from '../constants';
 import Modal from './common/Modal'; // Use common Modal
@@ -10,7 +10,9 @@ const ApiClientForm: React.FC<{
     client: Omit<ApiClient, 'id'>,
     setClient: React.Dispatch<React.SetStateAction<Omit<ApiClient, 'id'>>>,
     mappings: Mapping[],
-}> = ({ client, setClient, mappings }) => {
+    incomingRoutes?: IncomingRoute[],
+    showToast: (message: string, type: 'success' | 'error') => void;
+}> = ({ client, setClient, mappings, incomingRoutes = [], showToast }) => {
     
     const handleHeaderChange = (index: number, field: 'key' | 'value', value: string) => {
         const updatedHeaders = [...client.headers];
@@ -20,9 +22,58 @@ const ApiClientForm: React.FC<{
     const addHeader = () => setClient(prev => ({ ...prev, headers: [...prev.headers, { id: crypto.randomUUID(), key: '', value: '' }] }));
     const removeHeader = (id: string) => setClient(prev => ({ ...prev, headers: prev.headers.filter(h => h.id !== id) }));
     
+    const handleLoadIncomingRouteSample = (routeId: string) => {
+        const route = incomingRoutes.find(r => r.id === routeId);
+        if (!route) return;
+        
+        setClient(prev => ({
+            ...prev,
+            url: route.path,
+            method: route.method === 'ANY' ? 'POST' : (route.method as any),
+            body: route.samplePayload || '{}'
+        }));
+        showToast(`Loaded details from Incoming Route "${route.name}"`, 'success');
+    };
+
+    const handleFormatBody = () => {
+        if (!client.body) return;
+        try {
+            const parsed = JSON.parse(client.body);
+            setClient(prev => ({ ...prev, body: JSON.stringify(parsed, null, 2) }));
+            showToast('Request body JSON formatted successfully!', 'success');
+        } catch (e: any) {
+            showToast(`Invalid JSON: ${e.message}`, 'error');
+        }
+    };
+    
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Visual loading from matching incoming routes templates */}
+                {incomingRoutes.length > 0 && (
+                    <div className="md:col-span-2 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+                        <div className="text-xs text-emerald-900">
+                            <p className="font-bold flex items-center gap-1">
+                                <span className="text-sm">&#9889;</span> Quick Template Loader
+                            </p>
+                            <p className="text-slate-500 mt-0.5">Hydrate endpoints and payload structures from custom Mock routes.</p>
+                        </div>
+                        <select 
+                            onChange={e => {
+                                handleLoadIncomingRouteSample(e.target.value);
+                                e.target.value = ""; // Reset select index
+                            }} 
+                            className="bg-white border text-xs text-slate-700 py-1.5 px-2.5 rounded-lg shadow-sm border-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            defaultValue=""
+                        >
+                            <option value="" disabled>-- Choose Route Payload --</option>
+                            {incomingRoutes.map(r => (
+                                <option key={r.id} value={r.id}>{r.name} ({r.method} {r.path})</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
                 <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700 mb-1">URL <span className="text-red-500">*</span></label>
                     <input type="text" placeholder="e.g., /api/users or https://..." value={client.url} onChange={e => setClient({ ...client, url: e.target.value })} className={`${DEFAULT_INPUT_CLASSES}`} />
@@ -40,7 +91,12 @@ const ApiClientForm: React.FC<{
                     <select value={client.mappingId ?? ""} onChange={e => setClient({ ...client, mappingId: e.target.value || null })} className={`${DEFAULT_INPUT_CLASSES}`}><option value="">No Mapping (for proxy testing)</option>{mappings.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Request Body (JSON)</label>
+                    <div className="flex justify-between items-center mb-1">
+                        <label className="block text-sm font-medium text-slate-700">Request Body (JSON)</label>
+                        {client.body && (
+                            <button type="button" onClick={handleFormatBody} className="text-xs px-2 py-1 bg-white border border-slate-300 rounded font-medium text-slate-700 hover:bg-slate-50 transition-colors">Format JSON</button>
+                        )}
+                    </div>
                     <textarea placeholder="{}" value={client.body} onChange={e => setClient({ ...client, body: e.target.value })} rows={4} className={`font-mono ${DEFAULT_INPUT_CLASSES}`}></textarea>
                 </div>
             </div>
@@ -63,11 +119,12 @@ interface ApiClientComponentProps {
   apiClients: ApiClient[];
   setApiClients: React.Dispatch<React.SetStateAction<ApiClient[]>>;
   mappings: Mapping[];
+  incomingRoutes?: IncomingRoute[];
   showToast: (message: string, type: 'success' | 'error') => void;
   showConfirmation: (title: string, message: string, onConfirm: () => void) => void;
 }
 
-const ApiClientComponent: React.FC<ApiClientComponentProps> = ({ apiClients, setApiClients, mappings, showToast, showConfirmation }) => {
+const ApiClientComponent: React.FC<ApiClientComponentProps> = ({ apiClients, setApiClients, mappings, incomingRoutes = [], showToast, showConfirmation }) => {
   const [expandedClientId, setExpandedClientId] = useState<string | null>(null);
   const [runningClientId, setRunningClientId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -131,7 +188,7 @@ const ApiClientComponent: React.FC<ApiClientComponentProps> = ({ apiClients, set
       </header>
       
       <Modal isOpen={isModalOpen && editingClient !== null} onClose={() => setIsModalOpen(false)} title={(editingClient && 'id' in editingClient) ? 'Edit API Client' : 'Add New API Client'} footer={modalFooter}>
-          <ApiClientForm client={editingClient!} setClient={setEditingClient as any} mappings={mappings} />
+          <ApiClientForm client={editingClient!} setClient={setEditingClient as any} mappings={mappings} incomingRoutes={incomingRoutes} showToast={showToast} />
       </Modal>
 
       <div className="flex flex-col md:flex-row items-center gap-4 p-5 bg-white rounded-xl shadow-md border border-slate-200">

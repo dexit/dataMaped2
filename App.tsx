@@ -50,10 +50,9 @@ const App: React.FC = () => {
   }, [mappings, incomingRoutes, outgoingRoutes]);
 
   useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 3000);
-      return () => clearTimeout(timer);
-    }
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(timer);
   }, [toast]);
   
   const showToast = useCallback((message: string, type: 'success' | 'error') => {
@@ -85,9 +84,9 @@ const App: React.FC = () => {
       case View.MANAGE_CATEGORIES:
         return <CategoryManager categories={categories} setCategories={setCategories} {...sharedProps} />;
       case View.VIEW_JSON:
-        return <JsonViewer mappings={mappings} showToast={showToast} />;
+        return <JsonViewer mappings={mappings} incomingRoutes={incomingRoutes} outgoingRoutes={outgoingRoutes} showToast={showToast} />;
       case View.API_CLIENTS:
-        return <ApiClientComponent apiClients={apiClients} setApiClients={setApiClients} mappings={mappings} {...sharedProps} />;
+        return <ApiClientComponent apiClients={apiClients} setApiClients={setApiClients} mappings={mappings} incomingRoutes={incomingRoutes} {...sharedProps} />;
       case View.LOGS:
         return <LogViewer logs={logs} setLogs={setLogs} />;
       default:
@@ -138,7 +137,7 @@ const App: React.FC = () => {
           <ul className="space-y-2">
             <NavItem view={View.MANAGE_MAPPINGS} label="Manage Mappings" icon={<IconMappings />} />
             <NavItem view={View.MANAGE_CATEGORIES} label="Manage Categories" icon={<IconCategory />} />
-            <NavItem view={View.VIEW_JSON} label="View Mappings JSON" icon={<IconJson />} />
+            <NavItem view={View.VIEW_JSON} label="Database & PHP Exports" icon={<IconJson />} />
           </ul>
         </nav>
         <div className="mt-auto text-sm text-slate-500 px-2 pt-6 border-t border-slate-700/50">

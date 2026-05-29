@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import type { IncomingRoute, OutgoingRoute, Condition, ConditionGroup, ConditionOperator, IncomingAuthentication, ApiClientHeader } from '../types';
 import { INCOMING_METHODS, CONDITION_OPERATORS, IconPlus, IconTrash, IconPencil, INCOMING_AUTH_TYPES, API_KEY_LOCATIONS, IconSearch, IconIncoming, DEFAULT_INPUT_CLASSES, PRIMARY_BUTTON_CLASSES, ICON_BUTTON_BASE_CLASSES, ICON_BUTTON_HOVER_INFO_CLASSES, ICON_BUTTON_HOVER_DANGER_CLASSES } from '../constants';
 import Modal from './common/Modal'; // Use common Modal
@@ -45,14 +46,21 @@ const IncomingAuthEditor: React.FC<{auth: IncomingAuthentication, setAuth: (a: I
 const ConditionComponent: React.FC<{condition: Condition, onChange: (c: Condition) => void, onRemove: () => void}> = ({condition, onChange, onRemove}) => {
     const showValueInput = condition.operator !== 'exists';
     return (
-        <div className="flex items-center gap-2 p-3 bg-slate-100 rounded-lg border border-slate-200">
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.97, y: -6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: 6 }}
+            transition={{ duration: 0.16, ease: 'easeOut' }}
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-slate-100 rounded-lg border border-slate-200 shadow-sm hover:border-slate-300 transition-colors duration-200"
+        >
             <input type="text" placeholder="body.user.id" value={condition.path} onChange={e => onChange({...condition, path: e.target.value})} className={`flex-grow font-mono ${DEFAULT_INPUT_CLASSES}`} />
-            <select value={condition.operator} onChange={e => onChange({...condition, operator: e.target.value as ConditionOperator})} className={DEFAULT_INPUT_CLASSES}>
+            <select value={condition.operator} onChange={e => onChange({...condition, operator: e.target.value as ConditionOperator})} className={`${DEFAULT_INPUT_CLASSES} sm:w-44`}>
                 {CONDITION_OPERATORS.map(op => <option key={op.id} value={op.id}>{op.label}</option>)}
             </select>
             {showValueInput && <input type="text" placeholder="Value" value={condition.value} onChange={e => onChange({...condition, value: e.target.value})} className={`flex-grow ${DEFAULT_INPUT_CLASSES}`} />}
-            <button onClick={onRemove} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_DANGER_CLASSES}`} title="Remove Condition"><IconTrash/></button>
-        </div>
+            <button onClick={onRemove} className={`${ICON_BUTTON_BASE_CLASSES} ${ICON_BUTTON_HOVER_DANGER_CLASSES} self-end sm:self-auto`} title="Remove Condition"><IconTrash/></button>
+        </motion.div>
     )
 }
 
@@ -80,7 +88,14 @@ const ConditionGroupComponent: React.FC<{group: ConditionGroup, onChange: (g: Co
     }
 
     return (
-        <div className={`p-4 rounded-xl ${isRoot ? 'bg-white' : 'bg-slate-200/70 border border-slate-300'} shadow-sm`}>
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.98, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.98, y: 10 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className={`p-4 rounded-xl ${isRoot ? 'bg-white' : 'bg-slate-200/70 border border-slate-300'} shadow-sm`}
+        >
             <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center gap-2">
                     <label className={`font-bold text-base ${group.type === 'AND' ? 'text-blue-600' : 'text-emerald-600'}`}>Match</label>
@@ -93,19 +108,128 @@ const ConditionGroupComponent: React.FC<{group: ConditionGroup, onChange: (g: Co
                 {!isRoot && <button onClick={onRemove} className={`${ICON_BUTTON_BASE_CLASSES} hover:bg-slate-300 ${ICON_BUTTON_HOVER_DANGER_CLASSES}`} title="Remove Group"><IconTrash/></button>}
             </div>
             <div className="space-y-3 pl-4 border-l-2 border-slate-300">
-                {group.conditions.map((cond, i) => (
-                    'conditions' in cond
-                        ? <ConditionGroupComponent key={cond.id} group={cond} onChange={(g) => updateCondition(i, g)} onRemove={() => removeCondition(i)} />
-                        : <ConditionComponent key={cond.id} condition={cond} onChange={(c) => updateCondition(i, c)} onRemove={() => removeCondition(i)} />
-                ))}
+                <AnimatePresence mode="popLayout">
+                    {group.conditions.map((cond, i) => (
+                        'conditions' in cond
+                            ? <ConditionGroupComponent key={cond.id} group={cond} onChange={(g) => updateCondition(i, g)} onRemove={() => removeCondition(i)} />
+                            : <ConditionComponent key={cond.id} condition={cond} onChange={(c) => updateCondition(i, c)} onRemove={() => removeCondition(i)} />
+                    ))}
+                </AnimatePresence>
                  <div className="flex items-center gap-3 pt-2">
                     <button onClick={addCondition} className="text-base font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">+ Add Condition</button>
                     <button onClick={addGroup} className="text-base font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">+ Add Group</button>
                 </div>
             </div>
-        </div>
+        </motion.div>
     )
 }
+
+// --- JSON Path Helpers & Conditions Evaluator ---
+const getValueByPath = (obj: any, path: string): any => {
+    if (!obj || !path) return undefined;
+    let cleanPath = path;
+    if (cleanPath.startsWith('$.')) cleanPath = cleanPath.slice(2);
+    // Remove query. or headers. or body. prefix if needed but let's make it robust
+    const keys = cleanPath.split('.');
+    let current = obj;
+    for (const key of keys) {
+        if (current === null || current === undefined) return undefined;
+        // Check for array extraction items[0]
+        const arrayMatch = key.match(/^(\w+)\[(\d+)\]$/);
+        if (arrayMatch) {
+            const prop = arrayMatch[1];
+            const index = parseInt(arrayMatch[2], 10);
+            current = current[prop];
+            if (Array.isArray(current)) {
+                current = current[index];
+            } else {
+                return undefined;
+            }
+        } else {
+            current = current[key];
+        }
+    }
+    return current;
+};
+
+const extractJsonPaths = (obj: any, prefix = 'body'): string[] => {
+    if (obj === null || obj === undefined) return [];
+    if (typeof obj !== 'object') return [];
+    
+    let paths: string[] = [];
+    for (const key of Object.keys(obj)) {
+        const val = obj[key];
+        const path = prefix ? `${prefix}.${key}` : key;
+        
+        if (val !== null && typeof val === 'object') {
+            if (Array.isArray(val)) {
+                paths.push(path);
+                if (val.length > 0) {
+                    if (typeof val[0] === 'object') {
+                        paths = [...paths, ...extractJsonPaths(val[0], `${path}[0]`)];
+                    } else {
+                        paths.push(`${path}[0]`);
+                    }
+                }
+            } else {
+                paths.push(path);
+                paths = [...paths, ...extractJsonPaths(val, path)];
+            }
+        } else {
+            paths.push(path);
+        }
+    }
+    return paths;
+};
+
+const evaluateCondition = (requestData: any, condition: Condition): boolean => {
+    const { path, operator, value } = condition;
+    try {
+        const targetValue = getValueByPath(requestData, path);
+        if (targetValue === undefined || targetValue === null) {
+            return operator === 'exists' ? false : false;
+        }
+
+        switch (operator) {
+            case 'eq': return String(targetValue) === value;
+            case 'neq': return String(targetValue) !== value;
+            case 'contains': return String(targetValue).toLowerCase().includes(value.toLowerCase());
+            case 'gt': return Number(targetValue) > Number(value);
+            case 'lt': return Number(targetValue) < Number(value);
+            case 'exists': return targetValue !== null && targetValue !== undefined;
+            default: return false;
+        }
+    } catch (e) {
+        return false;
+    }
+};
+
+const evaluateConditionGroup = (requestData: any, group: ConditionGroup | undefined): { matched: boolean; details: any[] } => {
+    if (!group || !group.conditions || group.conditions.length === 0) {
+        return { matched: true, details: [] };
+    }
+    
+    const details: any[] = [];
+    
+    const evaluateNode = (node: any): boolean => {
+        if ('conditions' in node) { // It's a ConditionGroup
+            const isAnd = node.type === 'AND';
+            const childResults = node.conditions.map((child: any) => evaluateNode(child));
+            return isAnd ? childResults.every((r: boolean) => r) : childResults.some((r: boolean) => r);
+        } else { // It's a Condition
+            const passed = evaluateCondition(requestData, node);
+            details.push({
+                id: node.id,
+                name: `${node.path} ${node.operator} "${node.value}"`,
+                passed
+            });
+            return passed;
+        }
+    };
+    
+    const matched = evaluateNode(group);
+    return { matched, details };
+};
 
 // --- Main Component ---
 interface IncomingRoutesManagerProps {
@@ -120,6 +244,97 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRoute, setEditingRoute] = useState<IncomingRoute | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    
+    // JSON Payload Configuration States
+    const [jsonError, setJsonError] = useState<string | null>(null);
+    const [discoveredPaths, setDiscoveredPaths] = useState<string[]>([]);
+    const [simulationResult, setSimulationResult] = useState<{ matched: boolean; details: any[] }>({ matched: true, details: [] });
+
+    // Handle payload live evaluation
+    useEffect(() => {
+        if (!editingRoute) {
+            setJsonError(null);
+            setDiscoveredPaths([]);
+            return;
+        }
+
+        const payloadStr = editingRoute.samplePayload;
+        if (!payloadStr || !payloadStr.trim()) {
+            setJsonError(null);
+            setDiscoveredPaths([]);
+            setSimulationResult({ matched: true, details: [] });
+            return;
+        }
+
+        try {
+            const parsed = JSON.parse(payloadStr);
+            setJsonError(null);
+            
+            // Extract all paths recursively
+            const paths = extractJsonPaths(parsed);
+            setDiscoveredPaths(paths);
+
+            // Run Simulator
+            const requestData = {
+                body: parsed,
+                headers: {},
+                query: {}
+            };
+            const result = evaluateConditionGroup(requestData, editingRoute.conditions);
+            setSimulationResult(result);
+        } catch (e: any) {
+            setJsonError(e.message || 'Invalid JSON format');
+            setDiscoveredPaths([]);
+            setSimulationResult({ matched: false, details: [] });
+        }
+    }, [editingRoute?.samplePayload, editingRoute?.conditions]);
+
+    const handleFormatSamplePayload = () => {
+        if (!editingRoute || !editingRoute.samplePayload) return;
+        try {
+            const parsed = JSON.parse(editingRoute.samplePayload);
+            setEditingRoute({
+                ...editingRoute,
+                samplePayload: JSON.stringify(parsed, null, 2)
+            });
+            showToast('JSON sample payload formatted successfully!', 'success');
+        } catch (e: any) {
+            showToast(`JSON is invalid: ${e.message}`, 'error');
+        }
+    };
+
+    const handleFormatMockResponseBody = () => {
+        if (!editingRoute || !editingRoute.mockResponseBody) return;
+        try {
+            const parsed = JSON.parse(editingRoute.mockResponseBody);
+            setEditingRoute({
+                ...editingRoute,
+                mockResponseBody: JSON.stringify(parsed, null, 2)
+            });
+            showToast('Mock response body formatted successfully!', 'success');
+        } catch (e: any) {
+            showToast(`JSON is invalid: ${e.message}`, 'error');
+        }
+    };
+
+    const addConditionToRoute = (path: string) => {
+        if (!editingRoute) return;
+        const newCondition: Condition = {
+            id: crypto.randomUUID(),
+            path,
+            operator: 'eq',
+            value: ''
+        };
+        const updatedConditions = {
+            ...editingRoute.conditions,
+            conditions: [...(editingRoute.conditions?.conditions || []), newCondition]
+        };
+        setEditingRoute({
+            ...editingRoute,
+            conditions: updatedConditions
+        });
+        showToast(`Added rule condition for ${path}`, 'success');
+    };
 
     const openAddModal = () => {
         setEditingRoute({
@@ -133,7 +348,8 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
             conditions: { id: crypto.randomUUID(), type: 'AND', conditions: [] },
             mockResponseStatusCode: 200,
             mockResponseHeaders: [],
-            mockResponseBody: '{}'
+            mockResponseBody: '{}',
+            samplePayload: ''
         });
         setIsModalOpen(true);
     };
@@ -143,6 +359,7 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
             mockResponseStatusCode: 200,
             mockResponseHeaders: [],
             mockResponseBody: '{}',
+            samplePayload: '',
             ...route,
             responseMode: route.responseMode || 'proxy',
             authentication: route.authentication || { type: 'none' }
@@ -193,7 +410,6 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
         setEditingRoute(prev => prev ? { ...prev, mockResponseHeaders: filteredHeaders } : null);
     };
 
-
     const removeRoute = (id: string) => {
         showConfirmation('Delete Incoming Route?', 'Are you sure you want to delete this route?', () => {
             setIncomingRoutes(prev => prev.filter(r => r.id !== id));
@@ -242,7 +458,97 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
                         
                         <IncomingAuthEditor auth={editingRoute.authentication} setAuth={auth => setEditingRoute({...editingRoute, authentication: auth})} />
 
-                        <div><label className="block text-sm font-medium text-slate-700 mb-1">Conditions</label><p className="text-xs text-slate-500 mb-2">Define additional rules to match the request. Use JSONPath for paths (e.g., `body.user.role`, `query.page`, `headers.x-api-key`).</p><ConditionGroupComponent group={editingRoute.conditions} onChange={c => setEditingRoute({...editingRoute, conditions: c})} isRoot /></div>
+                        {/* Custom Expected JSON Payload section */}
+                        <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-4 shadow-sm">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-base font-bold text-slate-800">Customize Expected Request Body</h3>
+                                    <p className="text-xs text-slate-500 mt-0.5">Provide a sample JSON payload to extract parameters and validate conditions instantly.</p>
+                                </div>
+                                {editingRoute.samplePayload && (
+                                    <button type="button" onClick={handleFormatSamplePayload} className="px-2.5 py-1 text-xs font-semibold rounded bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 shadow-sm transition-colors">Format JSON</button>
+                                )}
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-600 mb-1">Incoming Body (JSON)</label>
+                                    <textarea 
+                                        value={editingRoute.samplePayload || ''} 
+                                        onChange={e => setEditingRoute({...editingRoute, samplePayload: e.target.value})} 
+                                        placeholder={`{\n  "userId": 1004,\n  "role": "admin",\n  "status": "active"\n}`} 
+                                        rows={6} 
+                                        className={`font-mono text-xs ${DEFAULT_INPUT_CLASSES} ${jsonError ? 'border-red-400 focus:border-red-500' : 'border-slate-300'}`}
+                                    />
+                                    {jsonError && <p className="text-xs text-red-500 mt-1 italic font-semibold">&#9888; {jsonError}</p>}
+                                    {!jsonError && editingRoute.samplePayload && <p className="text-xs text-emerald-600 mt-1 font-semibold">&#10003; JSON valid</p>}
+                                </div>
+                                
+                                <div className="flex flex-col border border-slate-200 rounded-lg p-3 bg-white max-h-48 overflow-y-auto">
+                                    <label className="block text-xs font-semibold text-slate-600 mb-2 pb-1 border-b border-slate-100">Click path to append constraint:</label>
+                                    {discoveredPaths.length === 0 ? (
+                                        <div className="flex-grow flex items-center justify-center text-center text-xs text-slate-400 p-2 italic">
+                                            Provide valid JSON properties to automatically build rules.
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-wrap gap-1">
+                                            {discoveredPaths.map(p => (
+                                                <button
+                                                    key={p}
+                                                    type="button"
+                                                    onClick={() => addConditionToRoute(p)}
+                                                    className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded text-xs font-mono transition-colors"
+                                                    title="Add matching rule"
+                                                >
+                                                    + {p}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Conditions</label>
+                            <p className="text-xs text-slate-500 mb-2">Define matching requirements. Paths like `body.user.role` or `query.page` can be tested instantly below.</p>
+                            <ConditionGroupComponent group={editingRoute.conditions} onChange={c => setEditingRoute({...editingRoute, conditions: c})} isRoot />
+                        </div>
+
+                        {/* Conditions matching simulator */}
+                        {editingRoute.samplePayload && !jsonError && (
+                            <div className={`p-4 rounded-xl border ${simulationResult.matched ? 'bg-emerald-50/50 border-emerald-300' : 'bg-rose-50/40 border-rose-200'} space-y-2`}>
+                                <div className="flex items-center gap-2">
+                                    {simulationResult.matched ? (
+                                        <span className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs bg-emerald-100 px-2.5 py-1 rounded-full">
+                                            &#10003; Interceptor Matches JSON
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center gap-1.5 text-rose-800 font-bold text-xs bg-rose-100 px-2.5 py-1 rounded-full">
+                                            &#9888; Conditions Unmatched
+                                        </span>
+                                    )}
+                                    <span className="text-xs text-slate-500 font-semibold">Conditions Live Simulator Sandbox</span>
+                                </div>
+                                {simulationResult.details && simulationResult.details.length > 0 ? (
+                                    <div className="text-xs space-y-1 pl-2 font-mono">
+                                        {simulationResult.details.map((detail, index) => (
+                                            <div key={detail.id || index} className="flex items-center gap-2">
+                                                <span className={`w-1.5 h-1.5 rounded-full ${detail.passed ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                                <span className={detail.passed ? 'text-emerald-700' : 'text-slate-500 line-through'}>
+                                                    {detail.name}
+                                                </span>
+                                                <span className={`text-[10px] px-1 rounded ${detail.passed ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                                                    {detail.passed ? 'satisfied' : 'failed'}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-slate-500 italic pl-2">No matching conditions configured. This endpoint will capture generic requests matching method & path.</p>
+                                )}
+                            </div>
+                        )}
                         
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">Response Mode</label>
@@ -273,7 +579,15 @@ const IncomingRoutesManager: React.FC<IncomingRoutesManagerProps> = ({ incomingR
                                     <button onClick={addHeader} className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">+ Add Header</button>
                                 </div>
 
-                                <div><label className="block text-sm font-medium text-slate-700 mb-1">Response Body</label><textarea value={editingRoute.mockResponseBody} onChange={e => setEditingRoute({...editingRoute, mockResponseBody: e.target.value})} rows={8} className={`mt-1 font-mono ${DEFAULT_INPUT_CLASSES}`}></textarea></div>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between items-center">
+                                        <label className="block text-sm font-medium text-slate-700">Response Body</label>
+                                        {editingRoute.mockResponseBody && (
+                                            <button type="button" onClick={handleFormatMockResponseBody} className="px-2 py-1 text-xs font-semibold rounded bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 shadow-sm transition-colors">Format JSON</button>
+                                        )}
+                                    </div>
+                                    <textarea value={editingRoute.mockResponseBody} onChange={e => setEditingRoute({...editingRoute, mockResponseBody: e.target.value})} rows={8} className={`mt-1 font-mono ${DEFAULT_INPUT_CLASSES}`}></textarea>
+                                </div>
                             </div>
                         )}
                     </div>

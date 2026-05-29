@@ -79,7 +79,11 @@ export const suggestMappings = async (
       },
     });
 
-    let jsonStr = response.text.trim();
+    const responseText = response.text;
+    if (!responseText) {
+      throw new Error("Received an empty response from the Gemini AI model.");
+    }
+    let jsonStr = responseText.trim();
     
     const parsedData = JSON.parse(jsonStr);
     

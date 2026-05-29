@@ -24,6 +24,26 @@ const GeminiSuggestModal: React.FC<{ isOpen: boolean; onClose: () => void; onApp
         } catch (e: any) { showToast(e instanceof Error ? e.message : 'Invalid JSON format or AI error.', 'error'); } 
         finally { setIsLoading(false); }
     };
+
+    const handleFormatSource = () => {
+        try {
+            const parsed = JSON.parse(sourceSchema);
+            setSourceSchema(JSON.stringify(parsed, null, 2));
+            showToast('Source JSON formatted successfully!', 'success');
+        } catch (e: any) {
+            showToast(`Invalid Source JSON: ${e.message}`, 'error');
+        }
+    };
+
+    const handleFormatTarget = () => {
+        try {
+            const parsed = JSON.parse(targetSchema);
+            setTargetSchema(JSON.stringify(parsed, null, 2));
+            showToast('Target JSON formatted successfully!', 'success');
+        } catch (e: any) {
+            showToast(`Invalid Target JSON: ${e.message}`, 'error');
+        }
+    };
     
     const footer = (
         <button onClick={handleSuggest} disabled={isLoading} className={`${PRIMARY_BUTTON_CLASSES} ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}>
@@ -31,7 +51,34 @@ const GeminiSuggestModal: React.FC<{ isOpen: boolean; onClose: () => void; onApp
         </button>
     );
 
-    return ( <Modal isOpen={isOpen} onClose={onClose} title="Get AI-Powered Mapping Suggestions" size="xl" footer={footer}><div className="space-y-4"><p className="text-base text-slate-600">Paste example JSON objects for your source and target data. The AI will analyze the keys and suggest mappings. Provide valid JSON.</p><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><textarea value={sourceSchema} onChange={e => setSourceSchema(e.target.value)} placeholder={`{\n  "user_id": 123,\n  "email_address": "test@example.com"\n}`} rows={10} className={`${DEFAULT_INPUT_CLASSES} font-mono`}></textarea><textarea value={targetSchema} onChange={e => setTargetSchema(e.target.value)} placeholder={`{\n  "userId": 123,\n  "email": "test@example.com"\n}`} rows={10} className={`${DEFAULT_INPUT_CLASSES} font-mono`}></textarea></div></div></Modal> );
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} title="Get AI-Powered Mapping Suggestions" size="xl" footer={footer}>
+            <div className="space-y-4">
+                <p className="text-base text-slate-600">Paste example JSON objects for your source and target data. The AI will analyze the keys and suggest mappings. Provide valid JSON.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                            <label className="text-xs font-semibold text-slate-600">Source JSON Schema</label>
+                            {sourceSchema && (
+                                <button type="button" onClick={handleFormatSource} className="text-[10px] px-2 py-0.5 bg-white border border-slate-300 rounded text-slate-700 hover:bg-slate-50 font-medium transition-colors">Format</button>
+                            )}
+                        </div>
+                        <textarea value={sourceSchema} onChange={e => setSourceSchema(e.target.value)} placeholder={`{\n  "user_id": 123,\n  "email_address": "test@example.com"\n}`} rows={10} className={`${DEFAULT_INPUT_CLASSES} font-mono`}></textarea>
+                    </div>
+                    
+                    <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                            <label className="text-xs font-semibold text-slate-600">Target JSON Schema</label>
+                            {targetSchema && (
+                                <button type="button" onClick={handleFormatTarget} className="text-[10px] px-2 py-0.5 bg-white border border-slate-300 rounded text-slate-700 hover:bg-slate-50 font-medium transition-colors">Format</button>
+                            )}
+                        </div>
+                        <textarea value={targetSchema} onChange={e => setTargetSchema(e.target.value)} placeholder={`{\n  "userId": 123,\n  "email": "test@example.com"\n}`} rows={10} className={`${DEFAULT_INPUT_CLASSES} font-mono`}></textarea>
+                    </div>
+                </div>
+            </div>
+        </Modal>
+    );
 };
 
 const CsvImportModal: React.FC<{ isOpen: boolean; onClose: () => void; onConfirm: (config: {name: string, category: string, datamap: DatamapEntry[]}) => void; csvData: { headers: string[], rows: string[][] } | null; categories: Category[]; showToast: (message: string, type: 'success' | 'error') => void; initialName: string; }> = ({ isOpen, onClose, onConfirm, csvData, categories, showToast, initialName }) => {

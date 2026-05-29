@@ -24,8 +24,12 @@ const pathStringToRegex = (path) => {
 };
 
 const checkCondition = (requestData, condition) => {
-    const { path, operator, value } = condition;
+    let { path, operator, value } = condition;
     try {
+        // Normalize path for robust standard JSONPath tracking
+        if (path && !path.startsWith('$.') && !path.startsWith('$')) {
+            path = '$.' + path;
+        }
         const extractedValue = self.JSONPath({ path, json: requestData });
         const targetValue = extractedValue.length > 0 ? extractedValue[0] : null;
 
